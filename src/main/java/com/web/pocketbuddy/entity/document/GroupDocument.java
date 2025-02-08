@@ -1,5 +1,6 @@
 package com.web.pocketbuddy.entity.document;
 
+import com.web.pocketbuddy.entity.document.enums.SettlementCycle;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -16,23 +17,31 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
-public class GroupExpenseDocument {
+public class GroupDocument {
 
     @Id
-    private String expenseId;
-    @NotNull
     private String groupId;
-
-    private String expenseDescription;
     @NotNull
-    private double expenseAmount;
+    private String groupName;
+    private String description;
 
-    private List<String> includedMembers;
-    @NotNull
-    private String registerByUserId;
     @CreatedDate
-    private Date createdDate;
+    private Date createDate;
     @LastModifiedDate
-    private Date updatedDate;
-    private boolean isUpdated;
+    private Date lastUpdateDate;
+    @NotNull
+    private String createdByUser;
+
+    private List<String> groupMembersUserId;
+
+    private SettlementCycle settlementCycle;
+
+    private double groupBudget;
+    private double budgetPerDay;
+
+    private Date tripStartDate;
+    private Date tripEndDate;
+
+
+
 }
