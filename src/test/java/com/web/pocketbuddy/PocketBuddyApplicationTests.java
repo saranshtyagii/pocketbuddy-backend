@@ -1,4 +1,4 @@
-package com.web_pocketbuddy.Pocket.Buddy;
+package com.web.pocketbuddy;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

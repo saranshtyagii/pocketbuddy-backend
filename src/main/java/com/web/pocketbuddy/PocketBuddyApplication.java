@@ -1,4 +1,4 @@
-package com.web_pocketbuddy.Pocket.Buddy;
+package com.web.pocketbuddy;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
