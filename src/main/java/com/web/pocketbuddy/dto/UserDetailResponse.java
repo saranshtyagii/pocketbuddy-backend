@@ -1,7 +1,12 @@
 package com.web.pocketbuddy.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+
 import java.util.List;
 
+@Builder
+@AllArgsConstructor
 public class UserDetailResponse {
 
     private String userId;
@@ -9,6 +14,6 @@ public class UserDetailResponse {
     private String email;
     private String mobileNumber;
 
-    private List<UserPersonalExpenseResponse> personalExpense;
+    private List<UserJoinGroupResponse> personalExpense;
 
 }
