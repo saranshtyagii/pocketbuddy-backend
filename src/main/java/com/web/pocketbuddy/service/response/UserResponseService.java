@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,10 +28,10 @@ public class UserResponseService implements UserService {
     @Override
     public UserDetailResponse registerUser(RegisterUser registerUser) {
 
-        if(isUsernameExist(registerUser.getUsername())) {
-            throw new UserApiException(ConstantsVariables.EMAIL_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
+        if(!isUsernameExist(registerUser.getUsername())) {
+            throw new UserApiException(ConstantsVariables.USERNAME_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
         }
-        if(isEmailExist(registerUser.getEmail())) {
+        if(!isEmailExist(registerUser.getEmail())) {
             throw new UserApiException(ConstantsVariables.EMAIL_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
         }
 
@@ -64,10 +65,12 @@ public class UserResponseService implements UserService {
 
 
     private boolean isUsernameExist(String username) {
-        return userMasterDoa.findByUsername(username).isPresent();
+         UserDocument savedUser = userMasterDoa.findByUsername(username).orElse(null);
+         return ObjectUtils.isEmpty(savedUser);
     }
 
     private boolean isEmailExist(String email) {
-        return userMasterDoa.findByEmail(email).isPresent();
+        UserDocument savedUser = userMasterDoa.findByEmail(email).orElse(null);
+        return ObjectUtils.isEmpty(savedUser);
     }
 }

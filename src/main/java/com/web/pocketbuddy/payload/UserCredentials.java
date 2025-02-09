@@ -9,5 +9,6 @@ public class UserCredentials {
 
     private String usernameOrEmail;
     private String password;
+    private String deviceId;
 
 }

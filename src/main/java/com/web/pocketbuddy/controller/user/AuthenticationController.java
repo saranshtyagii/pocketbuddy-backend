@@ -7,6 +7,7 @@ import com.web.pocketbuddy.payload.UserCredentials;
 import com.web.pocketbuddy.security.JwtTokenUtils;
 import com.web.pocketbuddy.security.JwtUserDetailService;
 import com.web.pocketbuddy.service.UserService;
+import com.web.pocketbuddy.service.mapper.MapperUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,9 +40,9 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserDetailResponse> registerUser(@RequestBody RegisterUser registerUser) {
+    public ResponseEntity<String> registerUser(@RequestBody RegisterUser registerUser) {
         UserDetailResponse response = userService.registerUser(registerUser);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(MapperUtils.convertObjectToString(response));
     }
 
 }
