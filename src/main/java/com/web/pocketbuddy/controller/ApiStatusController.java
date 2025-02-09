@@ -60,7 +60,7 @@ public class ApiStatusController {
             userMasterDoa.delete(savedUser);
             return ResponseEntity.ok("Database is working fine! User created and deleted successfully.");
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Error checking database: " + e.getMessage());
+            return ResponseEntity.internalServerError().body("Database is not working fine, please check!");
         }
     }
 
