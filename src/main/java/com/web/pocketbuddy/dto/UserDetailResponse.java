@@ -1,13 +1,13 @@
 package com.web.pocketbuddy.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.List;
 
 @Builder
 @AllArgsConstructor
+@Getter
+@Setter
 public class UserDetailResponse {
 
     private String userId;
