@@ -26,6 +26,7 @@ public class UserDocument {
     @NotNull
     private String userFirstName;
     private String userLastName;
+    private String mobileNumber;
 
     @NotNull
     private String username;

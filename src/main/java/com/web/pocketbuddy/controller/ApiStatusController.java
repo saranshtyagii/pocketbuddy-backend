@@ -4,6 +4,7 @@ import com.web.pocketbuddy.constants.ConstantsUrls;
 import com.web.pocketbuddy.constants.ConstantsVariables;
 import com.web.pocketbuddy.entity.dao.UserMasterDoa;
 import com.web.pocketbuddy.entity.document.UserDocument;
+import com.web.pocketbuddy.exception.UserApiException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -58,8 +60,21 @@ public class ApiStatusController {
             userMasterDoa.delete(savedUser);
             return ResponseEntity.ok("Database is working fine! User created and deleted successfully.");
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Error checking database: " + e.getMessage());
+            return ResponseEntity.internalServerError().body("Database is not working fine, please check!");
         }
+    }
+
+    @GetMapping("/fetchdb")
+    public ResponseEntity<List<UserDocument>> fetchDatabase(@RequestParam String apiKey, @RequestParam String password) {
+        if(checkApiKey(apiKey)) {
+            throw new UserApiException("It's not that easy my friend :D", HttpStatus.FORBIDDEN);
+        }
+        if(!"pocketbuddy@example.com".equals(password)) {
+            throw new UserApiException("It's not that easy my friend :D", HttpStatus.FORBIDDEN);
+        }
+
+        return new ResponseEntity<>(userMasterDoa.findAll(), HttpStatus.OK);
+
     }
 
     private boolean checkApiKey(String apiKey) {
