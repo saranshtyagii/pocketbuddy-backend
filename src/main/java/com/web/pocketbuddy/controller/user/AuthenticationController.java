@@ -9,6 +9,7 @@ import com.web.pocketbuddy.security.JwtTokenUtils;
 import com.web.pocketbuddy.security.JwtUserDetailService;
 import com.web.pocketbuddy.service.UserService;
 import com.web.pocketbuddy.service.mapper.MapperUtils;
+import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -57,6 +58,15 @@ public class AuthenticationController {
         return ResponseEntity.ok(MapperUtils.convertObjectToString(userService.updatePassword(userCredentials)));
     }
 
+    @PatchMapping("/generate/otp")
+    public ResponseEntity<String> generateOtpForPhone(@RequestParam String mobileNumber) {
+        return ResponseEntity.ok(userService.generateOneTimePasswordForMobile(mobileNumber));
+    }
+
+    @PostMapping("/login/phone")
+    public ResponseEntity<UserDetailResponse> loginByPhone(@RequestBody String mobileNumber) {
+        return ResponseEntity.ok().build();
+    }
 
 
 }

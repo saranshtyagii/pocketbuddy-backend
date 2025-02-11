@@ -21,4 +21,6 @@ public interface UserService {
     public String verifyEmailOtp(String usernameOrEmail, String otp);
 
     public UserDetailResponse updatePassword(UserCredentials userCredentials);
+
+    public String generateOneTimePasswordForMobile(String mobileNumber);
 }

@@ -1,5 +1,6 @@
 package com.web.pocketbuddy.service.response;
 
+import com.web.pocketbuddy.constants.ConstantsUrls;
 import com.web.pocketbuddy.constants.ConstantsVariables;
 import com.web.pocketbuddy.dto.UserDetailResponse;
 import com.web.pocketbuddy.entity.dao.UserMasterDoa;
@@ -46,6 +47,9 @@ public class UserResponseService implements UserService {
         }
 
         UserDocument requestedUser = MapperUtils.toUserDocument(registerUser);
+        if(registerUser.getPassword().length() < ConstantsVariables.MINIMUM_PASSWORD_LENGTH) {
+            throw new UserApiException(ConstantsVariables.WEEK_PASSWORD, HttpStatus.BAD_REQUEST);
+        }
         requestedUser.setPassword(passwordEncoder.encode(registerUser.getPassword()));
 
         // TODO: Find the user join groups
@@ -109,6 +113,19 @@ public class UserResponseService implements UserService {
         savedUser.setPassword(passwordEncoder.encode(userCredentials.getPassword()));
 
         return MapperUtils.toUserDetailResponse(userMasterDoa.save(savedUser), new ArrayList<>());
+    }
+
+    @Override
+    public String generateOneTimePasswordForMobile(String mobileNumber) {
+        UserDocument savedUser = userMasterDoa.findByMobileNumber(mobileNumber)
+                .orElseThrow(() -> new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST));
+
+        String otp = createSixDigitNumber();
+        savedUser.setOneTimePassword(otp);
+
+        // ToDo :: Send Otp to register mobile number
+
+        return ConstantsVariables.OTP_SEND_MESSAGE + maskedString(savedUser.getMobileNumber(), false);
     }
 
     private boolean isUsernameExist(String username) {
