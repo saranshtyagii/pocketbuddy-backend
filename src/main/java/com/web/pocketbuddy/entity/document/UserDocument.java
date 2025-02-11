@@ -40,7 +40,7 @@ public class UserDocument {
     @LastModifiedDate
     private Date lastUpdatedDate;
 
-    private int oneTimePassword;
+    private String oneTimePassword;
     private String emailVerificationToken;
 
     private boolean subscribeEmailNotification = true;

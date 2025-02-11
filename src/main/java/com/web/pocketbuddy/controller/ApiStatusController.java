@@ -72,7 +72,6 @@ public class ApiStatusController {
         if(!"pocketbuddy@example.com".equals(password)) {
             throw new UserApiException("It's not that easy my friend :D", HttpStatus.FORBIDDEN);
         }
-
         return new ResponseEntity<>(userMasterDoa.findAll(), HttpStatus.OK);
 
     }

@@ -16,6 +16,12 @@ public class ConstantsVariables {
     public static final String INVALID_PASSWORD = "Invalid password";
     public static final String INVALID_PHONE_NUMBER = "Invalid phone number";
     public static final String WEEK_PASSWORD = "Password must contain at least 8 characters";
+    public static final String MOBILE_NUMBER_ALREADY_EXIST = "Mobile number already exists";
+    public static final String INVALID_OTP = "Invalid otp, please try again";
+
+    public static final String OTP_SEND_MESSAGE = "otp send to : ";
+
+    public static final int MINIMUM_PASSWORD_LENGTH = 8;
 
 
 }

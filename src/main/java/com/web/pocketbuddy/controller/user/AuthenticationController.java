@@ -1,6 +1,7 @@
 package com.web.pocketbuddy.controller.user;
 
 import com.web.pocketbuddy.constants.ConstantsUrls;
+import com.web.pocketbuddy.dto.TokenResponse;
 import com.web.pocketbuddy.dto.UserDetailResponse;
 import com.web.pocketbuddy.payload.RegisterUser;
 import com.web.pocketbuddy.payload.UserCredentials;
@@ -8,8 +9,8 @@ import com.web.pocketbuddy.security.JwtTokenUtils;
 import com.web.pocketbuddy.security.JwtUserDetailService;
 import com.web.pocketbuddy.service.UserService;
 import com.web.pocketbuddy.service.mapper.MapperUtils;
+import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,11 +33,8 @@ public class AuthenticationController {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(userCredentials.getUsernameOrEmail(), userCredentials.getPassword())
         );
-
         UserDetails userDetails = userDetailService.loadUserByUsername(userCredentials.getUsernameOrEmail());
-        String token = jwtTokenUtils.generateToken(userDetails);
-
-        return ResponseEntity.ok(token);
+        return ResponseEntity.ok(MapperUtils.convertObjectToString(new TokenResponse(jwtTokenUtils.generateToken(userDetails))));
     }
 
     @PostMapping("/register")
@@ -44,5 +42,31 @@ public class AuthenticationController {
         UserDetailResponse response = userService.registerUser(registerUser);
         return ResponseEntity.ok(MapperUtils.convertObjectToString(response));
     }
+
+    @PatchMapping("/forgot/password")
+    public ResponseEntity<String> generateOneTimePassword(@RequestParam String usernameOrEmail) {
+        return ResponseEntity.ok(userService.generateOneTimePassword(usernameOrEmail));
+    }
+
+    @PatchMapping("/verify/email/otp")
+    public ResponseEntity<String> verifyOtp(@RequestParam String usernameOrEmail, @RequestParam String otp) {
+        return ResponseEntity.ok(userService.verifyEmailOtp(usernameOrEmail, otp));
+    }
+
+    @PostMapping("/update/password")
+    public ResponseEntity<String> updatePassword(@RequestBody UserCredentials userCredentials) {
+        return ResponseEntity.ok(MapperUtils.convertObjectToString(userService.updatePassword(userCredentials)));
+    }
+
+    @PatchMapping("/generate/otp")
+    public ResponseEntity<String> generateOtpForPhone(@RequestParam String mobileNumber) {
+        return ResponseEntity.ok(userService.generateOneTimePasswordForMobile(mobileNumber));
+    }
+
+    @PostMapping("/login/phone")
+    public ResponseEntity<UserDetailResponse> loginByPhone(@RequestBody String mobileNumber) {
+        return ResponseEntity.ok().build();
+    }
+
 
 }
