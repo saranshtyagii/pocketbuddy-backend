@@ -1,9 +1,12 @@
 package com.web.pocketbuddy.service.mapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.web.pocketbuddy.dto.PersonalResponseResponse;
 import com.web.pocketbuddy.dto.UserDetailResponse;
 import com.web.pocketbuddy.dto.UserJoinGroupResponse;
+import com.web.pocketbuddy.entity.document.PersonalExpenseDocument;
 import com.web.pocketbuddy.entity.document.UserDocument;
+import com.web.pocketbuddy.payload.AddPersonalExpense;
 import com.web.pocketbuddy.payload.RegisterUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,8 +30,6 @@ public class MapperUtils {
                 .username(registerUser.getUsername())
                 .email(registerUser.getEmail())
                 .mobileNumber(registerUser.getMobileNumber())
-                .createdDate(new Date()) // Set creation date
-                .lastUpdatedDate(new Date()) // Set last updated date
                 .subscribeEmailNotification(true) // Default value
                 .showGroupExpenseInPersonalExpenseList(false) // Default value
                 .build();
@@ -55,5 +56,29 @@ public class MapperUtils {
             return null;
         }
 
+    }
+
+    public static PersonalExpenseDocument convertToPersonalExpenseDocument(AddPersonalExpense expense) {
+        return PersonalExpenseDocument.builder()
+                .userId(expense.getUserID())
+                .expenseDescription(expense.getDescription())
+                .amount(expense.getAmount())
+                .isUpdated(false)
+                .isDeleted(false)
+                .isExpenseFromGroup(false)
+                .amount(expense.getAmount())
+                .build();
+    }
+
+    public static PersonalResponseResponse convertTOPersonalExpenseResponse(PersonalExpenseDocument save) {
+        return PersonalResponseResponse.builder()
+                .expenseId(save.getExpenseId())
+                .description(save.getExpenseDescription())
+                .amount(save.getAmount())
+                .expenseDate(save.getExpenseDate())
+                .updatedDate(save.getLastModifiedDate())
+                .isEdited(save.isUpdated())
+                .isDeleted(save.isDeleted())
+                .build();
     }
 }

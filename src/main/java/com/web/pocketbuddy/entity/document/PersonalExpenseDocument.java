@@ -19,16 +19,21 @@ public class PersonalExpenseDocument {
 
     @Id
     private String expenseId;
+
+    private String userId;
+
     @NotNull
     private String expenseDescription;
 
-    @CreatedDate
     private Date expenseDate;
+
     @LastModifiedDate
     private Date lastModifiedDate;
-    private boolean isUpdated;
 
-    private boolean expenseFromGroup;
+    private boolean isUpdated;
+    private boolean isDeleted;
+
+    private boolean isExpenseFromGroup;
     private String groupId;
     private String groupExpenseId;
 

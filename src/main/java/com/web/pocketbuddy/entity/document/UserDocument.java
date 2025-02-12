@@ -1,5 +1,6 @@
 package com.web.pocketbuddy.entity.document;
 
+import com.web.pocketbuddy.entity.helper.DeviceDetail;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -48,9 +49,13 @@ public class UserDocument {
     private Date lastLoginDate;
     private String lastLoginIp;
     private String lastLoginDevice;
+    private String currentModelName;
+    private String currentModelVersion;
+    private String currentOsVersion;
+    private String currentAppVersion;
 
     // Id - token || value - Device Detail (Device Id - Model Name)
-    Map<String, Map<String, String>> listOfLoginDevices;
+    Map<String, DeviceDetail> listOfLoginDevices;
 
     private List<GroupDocument> userJoinGroup;
 
@@ -63,4 +68,7 @@ public class UserDocument {
     private double userYearlyIncome;
 
     private boolean showGroupExpenseInPersonalExpenseList = false;
+
+    private boolean isEmailVerified = false;
+    private boolean isPhoneVerified = false;
 }

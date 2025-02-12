@@ -9,11 +9,11 @@ public class UserCredentials {
 
     private String usernameOrEmail;
     private String password;
-//    private String deviceId;
-//    private String ipAddress;
-//    private String modelName;
-//    private String modelVersion;
-//    private String osVersion;
-//    private String appVersion;
+    private String deviceId;
+    private String ipAddress;
+    private String modelName;
+    private String modelVersion;
+    private String osVersion;
+    private String appVersion;
 
 }
