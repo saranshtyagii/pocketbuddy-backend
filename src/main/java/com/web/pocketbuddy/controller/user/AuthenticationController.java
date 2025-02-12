@@ -3,6 +3,7 @@ package com.web.pocketbuddy.controller.user;
 import com.web.pocketbuddy.constants.ConstantsUrls;
 import com.web.pocketbuddy.dto.TokenResponse;
 import com.web.pocketbuddy.dto.UserDetailResponse;
+import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.payload.RegisterUser;
 import com.web.pocketbuddy.payload.UserCredentials;
 import com.web.pocketbuddy.security.JwtTokenUtils;
@@ -34,7 +35,11 @@ public class AuthenticationController {
                 new UsernamePasswordAuthenticationToken(userCredentials.getUsernameOrEmail(), userCredentials.getPassword())
         );
         UserDetails userDetails = userDetailService.loadUserByUsername(userCredentials.getUsernameOrEmail());
-        return ResponseEntity.ok(MapperUtils.convertObjectToString(new TokenResponse(jwtTokenUtils.generateToken(userDetails))));
+        TokenResponse tokenResponse = new TokenResponse(jwtTokenUtils.generateToken(userDetails));
+
+        userService.saveUserTokenAndData(userCredentials, tokenResponse.getToken());
+
+        return ResponseEntity.ok(MapperUtils.convertObjectToString(tokenResponse));
     }
 
     @PostMapping("/register")

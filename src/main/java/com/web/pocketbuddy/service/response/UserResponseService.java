@@ -6,6 +6,8 @@ import com.web.pocketbuddy.dto.UserDetailResponse;
 import com.web.pocketbuddy.entity.dao.UserMasterDoa;
 import com.web.pocketbuddy.entity.document.GroupDocument;
 import com.web.pocketbuddy.entity.document.UserDocument;
+import com.web.pocketbuddy.entity.helper.DeviceDetail;
+import com.web.pocketbuddy.entity.helper.OtpGenerateUtils;
 import com.web.pocketbuddy.exception.UserApiException;
 import com.web.pocketbuddy.payload.RegisterUser;
 import com.web.pocketbuddy.payload.UserCredentials;
@@ -20,9 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -79,10 +79,9 @@ public class UserResponseService implements UserService {
 
     @Override
     public String generateOneTimePassword(String usernameOrEmail) {
-        UserDocument savedUser = userMasterDoa.findByEmailOrUsername(usernameOrEmail, usernameOrEmail)
-                .orElseThrow(() -> new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST));
+        UserDocument savedUser = fetchUserByUsernameOrEmail(usernameOrEmail);
 
-        String otp = createSixDigitNumber();
+        String otp = OtpGenerateUtils.generateOtp();
         savedUser.setOneTimePassword(otp);
         userMasterDoa.save(savedUser);
 
@@ -98,8 +97,7 @@ public class UserResponseService implements UserService {
 
     @Override
     public String verifyEmailOtp(String usernameOrEmail, String otp) {
-        UserDocument savedUser = userMasterDoa.findByEmailOrUsername(usernameOrEmail, usernameOrEmail)
-                .orElseThrow(() -> new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST));
+        UserDocument savedUser = fetchUserByUsernameOrEmail(usernameOrEmail);
         if(otp.equals(savedUser.getOneTimePassword())) {
             return "Opt verify successfully";
         }
@@ -108,8 +106,7 @@ public class UserResponseService implements UserService {
 
     @Override
     public UserDetailResponse updatePassword(UserCredentials userCredentials) {
-        UserDocument savedUser = userMasterDoa.findByEmailOrUsername(userCredentials.getUsernameOrEmail(), userCredentials.getUsernameOrEmail())
-                .orElseThrow(() -> new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST));
+        UserDocument savedUser = fetchUserByUsernameOrEmail(userCredentials.getUsernameOrEmail());
         savedUser.setPassword(passwordEncoder.encode(userCredentials.getPassword()));
 
         return MapperUtils.toUserDetailResponse(userMasterDoa.save(savedUser), new ArrayList<>());
@@ -120,12 +117,69 @@ public class UserResponseService implements UserService {
         UserDocument savedUser = userMasterDoa.findByMobileNumber(mobileNumber)
                 .orElseThrow(() -> new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST));
 
-        String otp = createSixDigitNumber();
+        String otp = OtpGenerateUtils.generateOtp();
         savedUser.setOneTimePassword(otp);
 
         // ToDo :: Send Otp to register mobile number
 
         return ConstantsVariables.OTP_SEND_MESSAGE + maskedString(savedUser.getMobileNumber(), false);
+    }
+
+    @Override
+    public void saveUserTokenAndData(UserCredentials userCredentials, String token) {
+        UserDocument savedUser = fetchUserByUsernameOrEmail(userCredentials.getUsernameOrEmail());
+
+        savedUser.setLastLoginDate(new Date());
+        savedUser.setLastLoginIp(userCredentials.getIpAddress());
+        savedUser.setCurrentModelName(userCredentials.getModelName());
+        savedUser.setCurrentModelVersion(userCredentials.getModelVersion());
+        savedUser.setCurrentOsVersion(userCredentials.getOsVersion());
+        savedUser.setCurrentAppVersion(userCredentials.getAppVersion());
+
+        Map<String, DeviceDetail> listOfDevices = savedUser.getListOfLoginDevices();
+        if(listOfDevices == null) {
+            listOfDevices = new HashMap<>();
+        }
+        DeviceDetail deviceDetail = DeviceDetail.builder()
+                .loginDate(new Date())
+                .loginIp(userCredentials.getIpAddress())
+                .loginDeviceId(userCredentials.getDeviceId())
+                .modelName(userCredentials.getModelName())
+                .modelVersion(userCredentials.getModelVersion())
+                .osVersion(userCredentials.getOsVersion())
+                .authToken(token)
+                .build();
+        listOfDevices.put(deviceDetail.getLoginDeviceId(), deviceDetail);
+        savedUser.setListOfLoginDevices(listOfDevices);
+
+
+        userMasterDoa.save(savedUser);
+    }
+
+    @Override
+    public String updateMobileNumber(String mobileNumber, String usernameOrEmail) {
+        UserDocument savedUser = fetchUserByUsernameOrEmail(usernameOrEmail);
+        savedUser.setOneTimePassword(OtpGenerateUtils.generateOtp());
+        userMasterDoa.save(savedUser);
+        return ConstantsVariables.OTP_SEND_MESSAGE + maskedString(savedUser.getMobileNumber(), false);
+    }
+
+    @Override
+    public String verifyPhoneNumber(String mobileNumber, String otp) {
+        UserDocument savedUser = userMasterDoa.findByMobileNumber(mobileNumber)
+                .orElseThrow(() -> new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST));
+
+        if(savedUser.isPhoneVerified()) {
+            return "Mobile is already verified";
+        }
+
+        if(otp.equals(savedUser.getOneTimePassword())) {
+            savedUser.setPhoneVerified(true);
+            return "Opt verify successfully";
+        }
+        else {
+            throw new UserApiException(ConstantsVariables.INVALID_OTP, HttpStatus.BAD_REQUEST);
+        }
     }
 
     private boolean isUsernameExist(String username) {
@@ -141,15 +195,6 @@ public class UserResponseService implements UserService {
     private boolean isMobileNumberExist(String mobileNumber) {
         UserDocument savedUser = userMasterDoa.findByMobileNumber(mobileNumber).orElse(null);
         return ObjectUtils.isEmpty(savedUser);
-    }
-
-    private String createSixDigitNumber() {
-        Random random = new Random();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 6; i++) {
-            sb.append(random.nextInt(10));
-        }
-        return sb.toString();
     }
 
     private String maskedString(@Email String unMaskedString, boolean isEmail) {
@@ -171,6 +216,11 @@ public class UserResponseService implements UserService {
             }
             return unMaskedString.charAt(0) + "*".repeat(unMaskedString.length() - 2) + unMaskedString.charAt(unMaskedString.length() - 1);
         }
+    }
+
+    private UserDocument fetchUserByUsernameOrEmail(String usernameOrEmail) {
+        return userMasterDoa.findByEmailOrUsername(usernameOrEmail, usernameOrEmail)
+                .orElseThrow(() -> new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST));
     }
 
 }

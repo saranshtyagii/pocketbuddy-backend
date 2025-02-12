@@ -17,4 +17,12 @@ public class UserDetailResponse {
 
     private List<UserJoinGroupResponse> personalExpense;
 
+    private double userMonthlyBudget;
+    private double userMonthlyExpense;
+    private double userMonthlyIncome;
+
+    private double userYearlyBudget;
+    private double userYearlyExpense;
+    private double userYearlyIncome;
+
 }

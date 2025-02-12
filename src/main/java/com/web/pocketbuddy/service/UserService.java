@@ -23,4 +23,10 @@ public interface UserService {
     public UserDetailResponse updatePassword(UserCredentials userCredentials);
 
     public String generateOneTimePasswordForMobile(String mobileNumber);
+
+    public void saveUserTokenAndData(UserCredentials userCredentials, String token);
+
+    public String updateMobileNumber(String mobileNumber, String usernameOrEmail);
+
+    public String verifyPhoneNumber(String phoneNumber, String otp);
 }
