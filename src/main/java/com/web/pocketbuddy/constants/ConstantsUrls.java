@@ -12,4 +12,6 @@ public class ConstantsUrls {
     public static final String PERSONAL_URL = BASE_URL_V1 + "/personal";
     public static final String GROUP_URL = BASE_URL_V1 + "/group";
 
+    public static final String ADD_URL = "/addmod/fetch/add";
+
 }
