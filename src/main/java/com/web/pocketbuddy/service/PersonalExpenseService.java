@@ -1,6 +1,5 @@
 package com.web.pocketbuddy.service;
 
-import com.web.pocketbuddy.controller.expense.PersonalExpense;
 import com.web.pocketbuddy.dto.PersonalResponseResponse;
 import com.web.pocketbuddy.payload.AddPersonalExpense;
 import com.web.pocketbuddy.payload.FetchByDates;

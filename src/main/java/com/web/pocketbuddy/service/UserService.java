@@ -1,10 +1,8 @@
 package com.web.pocketbuddy.service;
 
 import com.web.pocketbuddy.dto.UserDetailResponse;
-import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.payload.RegisterUser;
 import com.web.pocketbuddy.payload.UserCredentials;
-import com.web.pocketbuddy.security.JwtUserDetailService;
 
 public interface UserService {
 

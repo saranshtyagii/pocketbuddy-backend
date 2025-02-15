@@ -1,5 +1,8 @@
 package com.web.pocketbuddy.payload;
 
+import lombok.Getter;
+
+@Getter
 public class FetchByDates {
 
     private String userID;

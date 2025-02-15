@@ -4,7 +4,6 @@ import com.web.pocketbuddy.dto.PersonalResponseResponse;
 import com.web.pocketbuddy.dto.UserDetailResponse;
 import com.web.pocketbuddy.entity.dao.PersonalExpenseMasterDoa;
 import com.web.pocketbuddy.entity.document.PersonalExpenseDocument;
-import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.exception.UserPersonalExpenseException;
 import com.web.pocketbuddy.payload.AddPersonalExpense;
 import com.web.pocketbuddy.payload.FetchByDates;

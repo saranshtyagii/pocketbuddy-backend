@@ -8,14 +8,10 @@ import com.web.pocketbuddy.entity.document.PersonalExpenseDocument;
 import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.payload.AddPersonalExpense;
 import com.web.pocketbuddy.payload.RegisterUser;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.ObjectUtils;
 
-import java.util.Date;
 import java.util.List;
-import java.util.logging.Logger;
 
 @Slf4j
 public class MapperUtils {
