@@ -54,7 +54,7 @@ public class UserResponseService implements UserService {
 
         // TODO: Find the user join groups
 
-        return MapperUtils.toUserDetailResponse(userMasterDoa.save(requestedUser), new ArrayList<>());
+        return MapperUtils.toUserDetailResponse(userMasterDoa.save(requestedUser));
     }
 
     @Override
@@ -74,7 +74,9 @@ public class UserResponseService implements UserService {
 
     @Override
     public UserDetailResponse findUserById(String id) {
-        return null;
+        UserDocument savedUser = userMasterDoa.findById(id)
+                .orElseThrow(() -> new UserApiException(ConstantsVariables.USER_NOT_FOUND, HttpStatus.NOT_FOUND));
+        return MapperUtils.toUserDetailResponse(savedUser);
     }
 
     @Override
@@ -109,7 +111,7 @@ public class UserResponseService implements UserService {
         UserDocument savedUser = fetchUserByUsernameOrEmail(userCredentials.getUsernameOrEmail());
         savedUser.setPassword(passwordEncoder.encode(userCredentials.getPassword()));
 
-        return MapperUtils.toUserDetailResponse(userMasterDoa.save(savedUser), new ArrayList<>());
+        return MapperUtils.toUserDetailResponse(userMasterDoa.save(savedUser));
     }
 
     @Override

@@ -1,12 +1,16 @@
 package com.web.pocketbuddy.service.mapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.web.pocketbuddy.dto.GroupDetailsResponse;
 import com.web.pocketbuddy.dto.PersonalResponseResponse;
 import com.web.pocketbuddy.dto.UserDetailResponse;
 import com.web.pocketbuddy.dto.UserJoinGroupResponse;
+import com.web.pocketbuddy.entity.document.GroupDocument;
+import com.web.pocketbuddy.entity.document.GroupExpenseDocument;
 import com.web.pocketbuddy.entity.document.PersonalExpenseDocument;
 import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.payload.AddPersonalExpense;
+import com.web.pocketbuddy.payload.GroupRegisterDetails;
 import com.web.pocketbuddy.payload.RegisterUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,13 +39,14 @@ public class MapperUtils {
                 .build();
     }
 
-    public static UserDetailResponse toUserDetailResponse(UserDocument userDocument, List<UserJoinGroupResponse> joinGroups) {
+    public static UserDetailResponse toUserDetailResponse(UserDocument userDocument) {
         return UserDetailResponse.builder()
                 .userId(userDocument.getUserId())
+                .userFirstName(userDocument.getUserFirstName())
+                .userLastName(userDocument.getUserLastName())
                 .username(userDocument.getUsername())
                 .email(userDocument.getEmail())
                 .mobileNumber(userDocument.getMobileNumber())
-                .personalExpense(joinGroups)
                 .build();
     }
 
@@ -80,5 +85,38 @@ public class MapperUtils {
                 .isEdited(save.isUpdated())
                 .isDeleted(save.isDeleted())
                 .build();
+    }
+
+    public static GroupDocument convertToGroupExpenseDocument(GroupRegisterDetails expense) {
+
+        GroupDocument groupDocument = GroupDocument.builder()
+                .groupName(expense.getGroupName())
+                .description(expense.getDescription())
+                .createdByUser(expense.getCreatedByUser())
+                .groupBudget(expense.getGroupBudget())
+                .groupBudget(expense.getGroupBudget())
+                .build();
+
+        if(expense.getBudgetPerDay() != 0) {
+            groupDocument.setBudgetPerDay(expense.getBudgetPerDay());
+        }
+
+        if(expense.getTripStartDate() != null && expense.getTripEndDate() != null) {
+            groupDocument.setTripStartDate(expense.getTripStartDate());
+            groupDocument.setTripEndDate(expense.getTripEndDate());
+        }
+        return groupDocument;
+    }
+
+    public static GroupDetailsResponse convertGroupDetailResponse(GroupDocument savedGroupDocument) {
+        return GroupDetailsResponse.builder()
+                .groupId(savedGroupDocument.getGroupId())
+                .groupName(savedGroupDocument.getGroupName())
+                .groupDescription(savedGroupDocument.getDescription())
+                .createdByUserId(savedGroupDocument.getCreatedByUser())
+                .createdAt(savedGroupDocument.getCreateDate())
+                .joinedMembers(savedGroupDocument.getMembers())
+                .build();
+
     }
 }
