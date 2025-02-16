@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,9 @@ public class GroupExpenseResponseService implements GroupExpenseService {
     public GroupDetailsResponse registerGroup(GroupRegisterDetails registerDetails) {
         GroupDocument groupDocument = MapperUtils.convertToGroupExpenseDocument(registerDetails);
         Map<String, String> joinedMembersMap = new HashMap<>();
-        joinedMembersMap.put(registerDetails.getCreatedByUser(), fetchUserFullName(registerDetails.getCreatedByUser()));
+        UserDocument savedUser = userService.findUserById(registerDetails.getCreatedByUser());
+        String fullName = savedUser.getUserFirstName() + " " + savedUser.getUserLastName();
+        joinedMembersMap.put(registerDetails.getCreatedByUser(), fullName);
         groupDocument.setMembers(joinedMembersMap);
 
         GroupDocument savedGroupDocument = groupDetailsMasterDoa.save(groupDocument);
@@ -66,20 +69,26 @@ public class GroupExpenseResponseService implements GroupExpenseService {
         if(ObjectUtils.isEmpty(joinedMembersMap)) {
             joinedMembersMap = new HashMap<>();
         }
-        joinedMembersMap.put(userId, fetchUserFullName(userId));
+        UserDocument savedUser = userService.findUserById(userId);
+        String fullName = savedUser.getUserFirstName() + " " + savedUser.getUserLastName();
+
+        joinedMembersMap.put(userId, fullName);
         savedGroup.setMembers(joinedMembersMap);
 
-        return MapperUtils.convertGroupDetailResponse(groupDetailsMasterDoa.save(savedGroup));
+        List<GroupDocument> userJoinGroup = savedUser.getUserJoinGroup();
+        if(userJoinGroup == null) {
+            userJoinGroup = new ArrayList<>();
+        }
+
+        GroupDocument updateGroupDetails = groupDetailsMasterDoa.save(savedGroup);
+        userJoinGroup.add(updateGroupDetails);
+
+        return MapperUtils.convertGroupDetailResponse(updateGroupDetails);
     }
 
     @Override
     public List<GroupDetailsResponse> getAllGroups(String userId) {
         return List.of();
-    }
-
-    private String fetchUserFullName(String userId) {
-        UserDetailResponse savedUser = userService.findUserById(userId);
-        return savedUser.getUserFirstName() + " " + savedUser.getUserLastName();
     }
 
     public GroupDocument fetchGroupDocument(String groupId) {

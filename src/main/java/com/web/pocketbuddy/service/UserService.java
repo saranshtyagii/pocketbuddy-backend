@@ -12,8 +12,9 @@ public interface UserService {
     public UserDetailResponse findUserByUsername(String username);
     public UserDetailResponse findUserByEmail(String email);
     public UserDetailResponse findUserByPhone(String phone);
-    public UserDetailResponse findUserById(String id);
+    public UserDocument findUserById(String id);
 
+    public UserDocument savedUpdatedUser(UserDocument userDocument);
 
     public String generateOneTimePassword(String usernameOrEmail);
     public String verifyMobileNumber(String mobile);

@@ -73,10 +73,17 @@ public class UserResponseService implements UserService {
     }
 
     @Override
-    public UserDetailResponse findUserById(String id) {
-        UserDocument savedUser = userMasterDoa.findById(id)
+    public UserDocument findUserById(String id) {
+        return userMasterDoa.findById(id)
                 .orElseThrow(() -> new UserApiException(ConstantsVariables.USER_NOT_FOUND, HttpStatus.NOT_FOUND));
-        return MapperUtils.toUserDetailResponse(savedUser);
+    }
+
+    @Override
+    public UserDocument savedUpdatedUser(UserDocument userDocument) {
+        if(ObjectUtils.isEmpty(userDocument)) {
+            throw new UserApiException("User Data can't be empty!", HttpStatus.BAD_REQUEST);
+        }
+        return userMasterDoa.save(userDocument);
     }
 
     @Override
