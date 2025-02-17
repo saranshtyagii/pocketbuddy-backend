@@ -160,7 +160,7 @@ public class PersonalExpenseResponseService implements PersonalExpenseService {
     @Override
     public boolean compareExpenseAmountWithMonthlyBudget(String userId) {
         double sum = getLastMonthTotalSum(userId);
-        UserDetailResponse savedUserResponse = userService.findUserById(userId);
+        UserDocument savedUserResponse = userService.findUserById(userId);
         return sum < savedUserResponse.getUserMonthlyExpense();
     }
 

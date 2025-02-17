@@ -9,7 +9,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
-import java.util.List;
+import java.util.Map;
 
 @Document
 @Builder
@@ -32,7 +32,7 @@ public class GroupDocument {
     @NotNull
     private String createdByUser;
 
-    private List<String> groupMembersUserId;
+    private Map<String, String> members;
 
     private SettlementCycle settlementCycle;
 

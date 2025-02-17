@@ -1,6 +1,5 @@
 package com.web.pocketbuddy.entity.dao;
 
-import com.web.pocketbuddy.dto.PersonalResponseResponse;
 import com.web.pocketbuddy.entity.document.PersonalExpenseDocument;
 import org.springframework.data.mongodb.repository.MongoRepository;
 

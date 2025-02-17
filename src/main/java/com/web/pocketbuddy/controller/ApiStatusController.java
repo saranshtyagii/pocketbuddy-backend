@@ -6,6 +6,7 @@ import com.web.pocketbuddy.entity.dao.UserMasterDoa;
 import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.exception.UserApiException;
 import lombok.AllArgsConstructor;
+import org.apache.catalina.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
@@ -76,9 +77,24 @@ public class ApiStatusController {
 
     }
 
+    @GetMapping("/remove-id")
+    public ResponseEntity<String> removeId(@RequestParam String apiKey, @RequestParam String password, @RequestParam String userId) {
+        if(checkApiKey(apiKey)) {
+            return ResponseEntity.badRequest().body("It's not that easy my friend :D");
+        }
+        if(!"pocketbuddy@example.com".equals(password)) {
+            throw new UserApiException("It's not that easy my friend :D", HttpStatus.FORBIDDEN);
+        }
+        UserDocument userDocument = userMasterDoa.findById(userId).orElse(null);
+        if(ObjectUtils.isEmpty(userDocument)) {
+            return ResponseEntity.badRequest().body("No such user found!");
+        }
+        userMasterDoa.delete(userDocument);
+        return ResponseEntity.ok("User Account with id: " +userId+ " deleted successfully.");
+    }
+
     private boolean checkApiKey(String apiKey) {
         return !apiKey.equals(ConstantsVariables.API_KEY);
     }
-
 
 }

@@ -11,10 +11,7 @@ public interface GroupExpenseService {
     public GroupDetailsResponse getGroupDetails(String groupId);
     public GroupDetailsResponse updateGroupDetails(String groupId, GroupDetailsResponse groupDetailsResponse);
     public GroupDetailsResponse deleteGroup(String groupId);
+    public GroupDetailsResponse joinGroup(String groupId, String userId);
 
     public List<GroupDetailsResponse> getAllGroups(String userId);
-
-
-
-
 }
