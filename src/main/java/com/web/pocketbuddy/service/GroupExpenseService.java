@@ -10,8 +10,12 @@ public interface GroupExpenseService {
     public GroupDetailsResponse registerGroup(GroupRegisterDetails registerDetails);
     public GroupDetailsResponse getGroupDetails(String groupId);
     public GroupDetailsResponse updateGroupDetails(String groupId, GroupDetailsResponse groupDetailsResponse);
-    public GroupDetailsResponse deleteGroup(String groupId);
+    public String deleteGroup(String groupId, String userId);
     public GroupDetailsResponse joinGroup(String groupId, String userId);
 
     public List<GroupDetailsResponse> getAllGroups(String userId);
+
+    public GroupDetailsResponse findGroupById(String groupId);
+
+    public String deleteGroupFromDb(String apiKey);
 }

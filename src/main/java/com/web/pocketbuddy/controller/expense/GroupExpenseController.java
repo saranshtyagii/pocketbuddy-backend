@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(ConstantsUrls.GROUP_URL)
 @AllArgsConstructor
-public class GroupExpense {
+public class GroupExpenseController {
 
     private final GroupExpenseService groupExpenseService;
 
@@ -24,6 +24,21 @@ public class GroupExpense {
     @PatchMapping("/join-group")
     public ResponseEntity<GroupDetailsResponse> joinGroup(@RequestParam String groupId, @RequestParam String userId) {
         return ResponseEntity.ok(groupExpenseService.joinGroup(groupId, userId));
+    }
+
+    @GetMapping("/find")
+    public ResponseEntity<GroupDetailsResponse> findGroup(@RequestParam String groupId) {
+        return ResponseEntity.ok(groupExpenseService.findGroupById(groupId));
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> deleteGroup(@RequestParam String groupId, @RequestParam String userId) {
+        return ResponseEntity.ok(groupExpenseService.deleteGroup(groupId, userId));
+    }
+
+    @GetMapping("/remove-groups")
+    public ResponseEntity<String> removeGroup(@RequestParam String apiKey) {
+        return ResponseEntity.ok(groupExpenseService.deleteGroupFromDb(apiKey));
     }
 
 }

@@ -1,9 +1,8 @@
 package com.web.pocketbuddy.service.response;
 
+import com.web.pocketbuddy.constants.ConstantsVariables;
 import com.web.pocketbuddy.dto.GroupDetailsResponse;
-import com.web.pocketbuddy.dto.UserDetailResponse;
 import com.web.pocketbuddy.entity.dao.GroupDetailsMasterDoa;
-import com.web.pocketbuddy.entity.dao.GroupExpenseMasterDoa;
 import com.web.pocketbuddy.entity.document.GroupDocument;
 import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.exception.GroupApiExceptions;
@@ -12,14 +11,14 @@ import com.web.pocketbuddy.service.GroupExpenseService;
 import com.web.pocketbuddy.service.UserService;
 import com.web.pocketbuddy.service.mapper.MapperUtils;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -31,6 +30,7 @@ public class GroupExpenseResponseService implements GroupExpenseService {
     @Override
     public GroupDetailsResponse registerGroup(GroupRegisterDetails registerDetails) {
         GroupDocument groupDocument = MapperUtils.convertToGroupExpenseDocument(registerDetails);
+        groupDocument.setDeleted(false);
         Map<String, String> joinedMembersMap = new HashMap<>();
         UserDocument savedUser = userService.findUserById(registerDetails.getCreatedByUser());
         String fullName = savedUser.getUserFirstName() + " " + savedUser.getUserLastName();
@@ -53,8 +53,15 @@ public class GroupExpenseResponseService implements GroupExpenseService {
     }
 
     @Override
-    public GroupDetailsResponse deleteGroup(String groupId) {
-        return null;
+    public String deleteGroup(String groupId, String userId) {
+        GroupDocument savedGroup = fetchGroupDocument(groupId);
+        if(!userId.equals(savedGroup.getCreatedByUser())) {
+            throw new GroupApiExceptions("You don't have a right to delete this Group.", HttpStatus.FORBIDDEN);
+        }
+        savedGroup.setDeleted(true);
+        savedGroup.setGroupDeletedDate(new Date());
+        groupDetailsMasterDoa.save(savedGroup);
+        return "Group " + groupId + " has been deleted";
     }
 
     @Override
@@ -89,6 +96,36 @@ public class GroupExpenseResponseService implements GroupExpenseService {
     @Override
     public List<GroupDetailsResponse> getAllGroups(String userId) {
         return List.of();
+    }
+
+    @Override
+    public GroupDetailsResponse findGroupById(String groupId) {
+        GroupDocument groupDocument = fetchGroupDocument(groupId);
+        return MapperUtils.convertGroupDetailResponse(groupDocument);
+    }
+
+    @Override
+    public String deleteGroupFromDb(String apiKey) {
+        if(!apiKey.equals(ConstantsVariables.API_KEY)) {
+            throw new GroupApiExceptions("Its not that easy :D", HttpStatus.FORBIDDEN);
+        }
+        List<GroupDocument> savedGroups = groupDetailsMasterDoa.findAll();
+
+        if(CollectionUtils.isEmpty(savedGroups)) {
+            return "There is no group to delete.";
+        }
+
+        // delete isDeleted Groups having date is greater than 30 days,
+        Date currentDate = new Date();
+        savedGroups.stream()
+                .filter(GroupDocument::isDeleted)
+                .forEach(groupDocument -> {
+                    if(groupDocument.getGroupDeletedDate().before(currentDate)) {
+                        groupDetailsMasterDoa.delete(groupDocument);
+                    }
+                });
+
+        return "All the groups have been deleted which marked as deleted before Date: "+currentDate.toString();
     }
 
     public GroupDocument fetchGroupDocument(String groupId) {
