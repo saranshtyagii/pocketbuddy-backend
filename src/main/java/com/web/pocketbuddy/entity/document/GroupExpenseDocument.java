@@ -35,4 +35,5 @@ public class GroupExpenseDocument {
     @LastModifiedDate
     private Date updatedDate;
     private boolean isUpdated;
+    private Boolean isDeleted;
 }

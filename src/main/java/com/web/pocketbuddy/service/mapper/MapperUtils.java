@@ -1,10 +1,7 @@
 package com.web.pocketbuddy.service.mapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.web.pocketbuddy.dto.GroupDetailsResponse;
-import com.web.pocketbuddy.dto.PersonalResponseResponse;
-import com.web.pocketbuddy.dto.UserDetailResponse;
-import com.web.pocketbuddy.dto.UserJoinGroupResponse;
+import com.web.pocketbuddy.dto.*;
 import com.web.pocketbuddy.entity.document.GroupDocument;
 import com.web.pocketbuddy.entity.document.GroupExpenseDocument;
 import com.web.pocketbuddy.entity.document.PersonalExpenseDocument;
@@ -12,14 +9,10 @@ import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.payload.AddPersonalExpense;
 import com.web.pocketbuddy.payload.GroupRegisterDetails;
 import com.web.pocketbuddy.payload.RegisterUser;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.ObjectUtils;
 
-import java.util.Date;
-import java.util.List;
-import java.util.logging.Logger;
+import java.util.ArrayList;
 
 @Slf4j
 public class MapperUtils {
@@ -87,7 +80,7 @@ public class MapperUtils {
                 .build();
     }
 
-    public static GroupDocument convertToGroupExpenseDocument(GroupRegisterDetails expense) {
+    public static GroupDocument convertToGroupDocument(GroupRegisterDetails expense) {
 
         GroupDocument groupDocument = GroupDocument.builder()
                 .groupName(expense.getGroupName())
@@ -118,5 +111,32 @@ public class MapperUtils {
                 .joinedMembers(savedGroupDocument.getMembers())
                 .build();
 
+    }
+
+    public static GroupExpensesDto toGroupExpensesDto(GroupExpenseDocument expense) {
+        return GroupExpensesDto.builder()
+                .expenseId(expense.getExpenseId())
+                .groupId(expense.getGroupId())
+                .description(expense.getExpenseDescription())
+                .amount(expense.getExpenseAmount())
+                .createDate(expense.getCreatedDate())
+                .lastUpdateDate(expense.getUpdatedDate())
+                .isUpdated(expense.isUpdated())
+                .paidByUserId(expense.getRegisterByUserId())
+                .includedMembers(new ArrayList<>())
+                .build();
+    }
+
+    public static GroupExpenseDocument convertToGroupExpenseDocument(GroupExpensesDto groupExpensesDto) {
+        return GroupExpenseDocument.builder()
+                .groupId(groupExpensesDto.getGroupId())
+                .expenseDescription(groupExpensesDto.getDescription())
+                .expenseAmount(groupExpensesDto.getAmount())
+                .includedMembers(new ArrayList<>())
+                .createdDate(groupExpensesDto.getCreateDate())
+                .registerByUserId(groupExpensesDto.getPaidByUserId())
+                .isDeleted(false)
+                .isUpdated(false)
+                .build();
     }
 }

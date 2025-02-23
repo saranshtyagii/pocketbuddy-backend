@@ -2,8 +2,11 @@ package com.web.pocketbuddy.service.response;
 
 import com.web.pocketbuddy.constants.ConstantsVariables;
 import com.web.pocketbuddy.dto.GroupDetailsResponse;
-import com.web.pocketbuddy.entity.dao.GroupDetailsMasterDoa;
+import com.web.pocketbuddy.dto.GroupExpensesDto;
+import com.web.pocketbuddy.entity.dao.GroupExpenseDetailsMasterDoa;
+import com.web.pocketbuddy.entity.dao.GroupExpenseMasterDoa;
 import com.web.pocketbuddy.entity.document.GroupDocument;
+import com.web.pocketbuddy.entity.document.GroupExpenseDocument;
 import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.exception.GroupApiExceptions;
 import com.web.pocketbuddy.payload.GroupRegisterDetails;
@@ -11,8 +14,6 @@ import com.web.pocketbuddy.service.GroupExpenseService;
 import com.web.pocketbuddy.service.UserService;
 import com.web.pocketbuddy.service.mapper.MapperUtils;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -25,11 +26,12 @@ import java.util.*;
 public class GroupExpenseResponseService implements GroupExpenseService {
 
     private final UserService userService;
-    private final GroupDetailsMasterDoa groupDetailsMasterDoa;
+    private final GroupExpenseDetailsMasterDoa groupDetailsMasterDoa;
+    private final GroupExpenseMasterDoa groupExpenseMasterDoa;
 
     @Override
     public GroupDetailsResponse registerGroup(GroupRegisterDetails registerDetails) {
-        GroupDocument groupDocument = MapperUtils.convertToGroupExpenseDocument(registerDetails);
+        GroupDocument groupDocument = MapperUtils.convertToGroupDocument(registerDetails);
         groupDocument.setDeleted(false);
         Map<String, String> joinedMembersMap = new HashMap<>();
         UserDocument savedUser = userService.findUserById(registerDetails.getCreatedByUser());
@@ -122,15 +124,61 @@ public class GroupExpenseResponseService implements GroupExpenseService {
                 .forEach(groupDocument -> {
                     if(groupDocument.getGroupDeletedDate().before(currentDate)) {
                         groupDetailsMasterDoa.delete(groupDocument);
+                        groupExpenseMasterDoa.deleteByGroupId(groupDocument.getGroupId());
                     }
                 });
 
         return "All the groups have been deleted which marked as deleted before Date: "+currentDate.toString();
     }
 
+    @Override
+    public List<GroupExpensesDto> findGroupExpensesByGroupId(String groupId) {
+        List<GroupExpenseDocument> savedExpenses = findNonDeletedGroupExpenses(groupId);
+        if(CollectionUtils.isEmpty(savedExpenses)) {
+            return new ArrayList<>();
+        }
+        return savedExpenses.stream().filter(expense -> !expense.getIsDeleted())
+                .map(MapperUtils::toGroupExpensesDto)
+                .toList();
+    }
+
+    @Override
+    public String markExpenseAsDeleted(String expenseId, String userId) {
+        GroupDocument savedGroup = fetchGroupDocument(expenseId);
+        if(!userId.equals(savedGroup.getCreatedByUser())) {
+            throw new GroupApiExceptions("You don't have a right to delete this Group.", HttpStatus.FORBIDDEN);
+        }
+        savedGroup.setDeleted(true);
+        savedGroup.setGroupDeletedDate(new Date());
+        savedGroup.setLastUpdateDate(new Date());
+
+        groupDetailsMasterDoa.save(savedGroup);
+        return "Expense " + expenseId + " has been deleted";
+    }
+
+    @Override
+    public List<GroupExpensesDto> addExpense(GroupExpensesDto groupExpensesDto) {
+        GroupExpenseDocument expenseDocument = MapperUtils.convertToGroupExpenseDocument(groupExpensesDto);
+        return findNonDeletedGroupExpenses(expenseDocument.getGroupId()).stream().map(MapperUtils::toGroupExpensesDto).toList();
+    }
+
     public GroupDocument fetchGroupDocument(String groupId) {
         return groupDetailsMasterDoa.findById(groupId)
                 .orElseThrow(() -> new GroupApiExceptions("No Such Group Found!", HttpStatus.NOT_FOUND));
+    }
+
+    private GroupExpenseDocument findGroupExpenseById(String expenseId) {
+        return groupExpenseMasterDoa.findById(expenseId)
+                .orElseThrow(() -> new GroupApiExceptions("No Such Expense Found!", HttpStatus.NOT_FOUND));
+    }
+
+    private List<GroupExpenseDocument> findNonDeletedGroupExpenses(String groupId) {
+        List<GroupExpenseDocument> saved = groupExpenseMasterDoa.findByGroupId(groupId)
+                .orElse(null);
+        if(CollectionUtils.isEmpty(saved)) {
+            return saved;
+        }
+        return saved.stream().filter(expense -> !expense.getIsDeleted()).toList();
     }
 
 }

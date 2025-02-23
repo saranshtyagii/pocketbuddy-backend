@@ -2,6 +2,8 @@ package com.web.pocketbuddy.controller.expense;
 
 import com.web.pocketbuddy.constants.ConstantsUrls;
 import com.web.pocketbuddy.dto.GroupDetailsResponse;
+import com.web.pocketbuddy.dto.GroupExpensesDto;
+import com.web.pocketbuddy.entity.document.GroupExpenseDocument;
 import com.web.pocketbuddy.payload.GroupRegisterDetails;
 import com.web.pocketbuddy.service.GroupExpenseService;
 import lombok.AllArgsConstructor;
@@ -9,12 +11,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping(ConstantsUrls.GROUP_URL)
 @AllArgsConstructor
 public class GroupExpenseController {
 
     private final GroupExpenseService groupExpenseService;
+
+    // Group Related Service
 
     @PostMapping("/new-group")
     public ResponseEntity<GroupDetailsResponse> registerGroup(@RequestBody GroupRegisterDetails registerDetails) {
@@ -39,6 +45,23 @@ public class GroupExpenseController {
     @GetMapping("/remove-groups")
     public ResponseEntity<String> removeGroup(@RequestParam String apiKey) {
         return ResponseEntity.ok(groupExpenseService.deleteGroupFromDb(apiKey));
+    }
+
+    // Group Expense Related Service
+
+    @PostMapping("/add-expense")
+    public ResponseEntity<List<GroupExpensesDto>> addExpense(@RequestBody GroupExpensesDto groupExpensesDto) {
+        return new ResponseEntity<>(groupExpenseService.addExpense(groupExpensesDto), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/find-expenses")
+    public ResponseEntity<List<GroupExpensesDto>> getAllGroupExpenses(@RequestParam String groupId) {
+        return ResponseEntity.ok(groupExpenseService.findGroupExpensesByGroupId(groupId));
+    }
+
+    @DeleteMapping("/remove-expense")
+    public ResponseEntity<String> removeExpense(@RequestParam String expenseId, @RequestParam String userId) {
+        return ResponseEntity.ok(groupExpenseService.markExpenseAsDeleted(expenseId, userId));
     }
 
 }

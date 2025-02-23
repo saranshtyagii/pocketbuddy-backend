@@ -1,6 +1,8 @@
 package com.web.pocketbuddy.service;
 
 import com.web.pocketbuddy.dto.GroupDetailsResponse;
+import com.web.pocketbuddy.dto.GroupExpensesDto;
+import com.web.pocketbuddy.entity.document.GroupExpenseDocument;
 import com.web.pocketbuddy.payload.GroupRegisterDetails;
 
 import java.util.List;
@@ -18,4 +20,10 @@ public interface GroupExpenseService {
     public GroupDetailsResponse findGroupById(String groupId);
 
     public String deleteGroupFromDb(String apiKey);
+
+    public List<GroupExpensesDto> findGroupExpensesByGroupId(String groupId);
+
+    String markExpenseAsDeleted(String expenseId, String userId);
+
+    List<GroupExpensesDto> addExpense(GroupExpensesDto groupExpensesDto);
 }
