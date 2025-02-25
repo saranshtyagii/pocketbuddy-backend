@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(ConstantsUrls.PERSONAL_URL)
-public class PersonalExpense {
+public class PersonalExpenseController {
 
     @GetMapping("/register")
     public ResponseEntity<Void> registerExpense(@RequestBody RegisterPersonalExpense expense) {

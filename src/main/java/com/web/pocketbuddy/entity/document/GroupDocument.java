@@ -42,6 +42,9 @@ public class GroupDocument {
     private Date tripStartDate;
     private Date tripEndDate;
 
+    private boolean deleted;
+    private Date groupDeletedDate;
+
 
 
 }
