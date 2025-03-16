@@ -1,17 +1,17 @@
 package com.web.pocketbuddy.service.response;
 
-import com.web.pocketbuddy.constants.ConstantsUrls;
 import com.web.pocketbuddy.constants.ConstantsVariables;
 import com.web.pocketbuddy.dto.UserDetailResponse;
 import com.web.pocketbuddy.entity.dao.UserMasterDoa;
-import com.web.pocketbuddy.entity.document.GroupDocument;
 import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.entity.helper.DeviceDetail;
 import com.web.pocketbuddy.entity.helper.OtpGenerateUtils;
+import com.web.pocketbuddy.entity.tracking.ThreadContextUtils;
 import com.web.pocketbuddy.exception.UserApiException;
+import com.web.pocketbuddy.logs.ElasticSearchUtils;
+import com.web.pocketbuddy.logs.LogsConstraints;
 import com.web.pocketbuddy.payload.RegisterUser;
 import com.web.pocketbuddy.payload.UserCredentials;
-import com.web.pocketbuddy.security.JwtUserDetailService;
 import com.web.pocketbuddy.service.UserService;
 import com.web.pocketbuddy.service.mapper.MapperUtils;
 import jakarta.validation.constraints.Email;
@@ -54,7 +54,18 @@ public class UserResponseService implements UserService {
 
         // TODO: Find the user join groups
 
-        return MapperUtils.toUserDetailResponse(userMasterDoa.save(requestedUser));
+        UserDocument userDocument = userMasterDoa.save(requestedUser);
+
+        ElasticSearchUtils elasticSearchUtils = ElasticSearchUtils.builder()
+                .userId(userDocument.getUserId())
+                .description(LogsConstraints.USER_CREATED_LOGS)
+                .webRequest(ThreadContextUtils.isWebRequest())
+                .ios(ThreadContextUtils.isIos())
+                .build();
+
+        ElasticSearchUtils.push(elasticSearchUtils, LogsConstraints.POCKET_BUDDY_APP_LOGS.toString());
+
+        return MapperUtils.toUserDetailResponse(userDocument);
     }
 
     @Override
