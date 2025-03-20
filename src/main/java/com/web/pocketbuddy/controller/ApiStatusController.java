@@ -3,8 +3,11 @@ package com.web.pocketbuddy.controller;
 import com.web.pocketbuddy.constants.ConstantsUrls;
 import com.web.pocketbuddy.constants.ConstantsVariables;
 import com.web.pocketbuddy.entity.dao.UserMasterDoa;
+import com.web.pocketbuddy.entity.document.Config;
 import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.exception.UserApiException;
+import com.web.pocketbuddy.service.mapper.MapperUtils;
+import com.web.pocketbuddy.service.response.ConfigService;
 import lombok.AllArgsConstructor;
 import org.apache.catalina.User;
 import org.springframework.http.HttpStatus;
@@ -91,6 +94,20 @@ public class ApiStatusController {
         }
         userMasterDoa.delete(userDocument);
         return ResponseEntity.ok("User Account with id: " +userId+ " deleted successfully.");
+    }
+
+    @GetMapping("/config")
+    private ResponseEntity<String> fetchServerConfig(@RequestParam String apiKey, @RequestParam String password) {
+        System.err.println("Config api call");
+        if(checkApiKey(apiKey)) {
+            return ResponseEntity.badRequest().body("It's not that easy my friend :D");
+        }
+        if(!"pocketbuddy@example.com".equals(password)) {
+            throw new UserApiException("It's not that easy my friend :D", HttpStatus.FORBIDDEN);
+        }
+
+        return new ResponseEntity<>(MapperUtils.convertObjectToString(ConfigService.getInstance()), HttpStatus.OK);
+
     }
 
     private boolean checkApiKey(String apiKey) {

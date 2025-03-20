@@ -4,6 +4,7 @@ import com.web.pocketbuddy.constants.ConstantsUrls;
 import com.web.pocketbuddy.dto.TokenResponse;
 import com.web.pocketbuddy.dto.UserDetailResponse;
 import com.web.pocketbuddy.entity.document.UserDocument;
+import com.web.pocketbuddy.exception.UserApiException;
 import com.web.pocketbuddy.payload.RegisterUser;
 import com.web.pocketbuddy.payload.UserCredentials;
 import com.web.pocketbuddy.security.JwtTokenUtils;
@@ -12,6 +13,7 @@ import com.web.pocketbuddy.service.UserService;
 import com.web.pocketbuddy.service.mapper.MapperUtils;
 import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,9 +33,14 @@ public class AuthenticationController {
     @PostMapping("/login")
     public ResponseEntity<String> authenticateUser(@RequestBody UserCredentials userCredentials) {
 
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(userCredentials.getUsernameOrEmail(), userCredentials.getPassword())
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(userCredentials.getUsernameOrEmail(), userCredentials.getPassword())
+            );
+        } catch (Exception e) {
+            throw new UserApiException("Invalid password", HttpStatus.UNAUTHORIZED);
+        }
+
         UserDetails userDetails = userDetailService.loadUserByUsername(userCredentials.getUsernameOrEmail());
         TokenResponse tokenResponse = new TokenResponse(jwtTokenUtils.generateToken(userDetails));
 

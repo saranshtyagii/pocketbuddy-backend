@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class RegisterPersonalExpense {
-
+    private String userId;
     private String description;
     private double amount;
 

@@ -23,22 +23,44 @@ public class ConfigService {
 
 	@EventListener(ContextRefreshedEvent.class)
 	private void loadConfig() {
-		List<Config> configs = configMasterDoa.findAll();
-		System.err.println(configs.get(0).toString());
-		if (!configs.isEmpty()) {
-			config = configs.get(0); // Load the first config
-			System.err.println("config has been loaded successfully:");
+		try {
+			List<Config> configs = configMasterDoa.findAll();
+			if(configs.isEmpty()) {
+				System.err.println("Config not found!");
+				setConfig();
+			}
+			System.err.println(configs.get(0).toString());
+			if (!configs.isEmpty()) {
+				config = configs.get(0); // Load the first config
+				System.err.println("config has been loaded successfully:");
+			}
+		} catch (Exception e) {
+			config = null;
+			System.err.println("Unable to load config: " + e.getMessage());
 		}
 	}
 
-	public static Config getInstance() {
-		if (ObjectUtils.isEmpty(config)) {
-			throw new RuntimeException("Unable to fetch config from the server");
+	public static Config getConfig() {
+		if(config == null) {
+			throw new RuntimeException("Config not found!");
 		}
 		return config;
 	}
 
+	public static Config getInstance() {
+		try {
+			if (ObjectUtils.isEmpty(config)) {
+				throw new RuntimeException("Unable to fetch config from the server");
+			}
+			return config;
+		} catch (Exception e) {
+
+			return null;
+		}
+	}
+
 	public void setConfig() {
+		System.err.println("Creating new config... Please wait...");
 		configMasterDoa.save(new Config(true, "", ""));
 	}
 
