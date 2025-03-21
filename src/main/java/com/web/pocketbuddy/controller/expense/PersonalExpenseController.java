@@ -19,7 +19,7 @@ public class PersonalExpenseController {
 
     private final PersonalExpenseService personalExpenseService;
 
-    @PostMapping("/register")
+    @GetMapping("/register")
     public ResponseEntity<PersonalExpenseResponse> registerExpense(@RequestBody AddPersonalExpense expense) {
         return ResponseEntity.ok(personalExpenseService.addPersonalExpense(expense));
     }

@@ -16,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -31,8 +33,7 @@ public class PersonalExpenseResponseService implements PersonalExpenseService {
 
     @Override
     public PersonalExpenseResponse addPersonalExpense(AddPersonalExpense expense) {
-        PersonalExpenseDocument personalExpenseDocument = MapperUtils.convertToPersonalExpenseDocument(expense);
-        PersonalExpenseDocument savedExpense = personalExpenseMasterDoa.save(personalExpenseDocument);
+        PersonalExpenseDocument savedExpense = personalExpenseMasterDoa.save(MapperUtils.convertToPersonalExpenseDocument(expense));
         return MapperUtils.convertTOPersonalExpenseResponse(savedExpense);
     }
 
@@ -92,9 +93,27 @@ public class PersonalExpenseResponseService implements PersonalExpenseService {
     }
 
     @Override
-    public List<PersonalExpenseResponse> getPersonalExpensesInRange(FindExpenseByDates datesData) {
-
+    public List<PersonalExpenseResponse> getPersonalExpensesInRange(FindExpenseByDates datedData) {
         return List.of();
+    }
+
+    @Override
+    public String deletePersonalExpenseFromDB(String apiKey) {
+        if(!apiKey.equals(ConstantsVariables.API_KEY)) {
+            throw new UserPersonalExpenseException("Invalid Api Key", HttpStatus.BAD_REQUEST);
+        }
+
+        List<PersonalExpenseDocument> savedPersonalExpenseDocuments = personalExpenseMasterDoa.findAll();
+        if(CollectionUtils.isEmpty(savedPersonalExpenseDocuments)) {
+            return "There is no personal expense to be deleted";
+        }
+
+        savedPersonalExpenseDocuments.parallelStream().forEach(expense -> {
+            if(expense.isDeleted()) {
+                personalExpenseMasterDoa.delete(expense);
+            }
+        });
+        return "All Expense has been deleted which marked as deleted";
     }
 
     @Override
