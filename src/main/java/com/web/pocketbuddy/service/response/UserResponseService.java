@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -189,6 +190,34 @@ public class UserResponseService implements UserService {
         else {
             throw new UserApiException(ConstantsVariables.INVALID_OTP, HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @Override
+    public String deleteUser(String userId) {
+        UserDocument savedUSer = userMasterDoa.findById(userId).orElseThrow(() -> new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST));
+
+        savedUSer.setDeleted(true);
+        userMasterDoa.save(savedUSer);
+        return "User has been deleted";
+    }
+
+    @Override
+    public String deleteUserFromDb(String apiKey) {
+
+        if(!apiKey.equals(ConstantsVariables.API_KEY)) {
+            throw new UserApiException("Invalid Api Key", HttpStatus.BAD_REQUEST);
+        }
+
+        List<UserDocument> savedUser = userMasterDoa.findAll();
+        if(CollectionUtils.isEmpty(savedUser)) {
+            return "No user found for delete";
+        }
+
+        savedUser.parallelStream().forEach(user -> {
+            if(user.isDeleted())
+                userMasterDoa.delete(user);
+        });
+        return "All user has been deleted which marked as deleted";
     }
 
     private boolean isUsernameExist(String username) {

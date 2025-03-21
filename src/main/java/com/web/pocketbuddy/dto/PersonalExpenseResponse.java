@@ -7,7 +7,7 @@ import java.util.Date;
 
 @Builder
 @AllArgsConstructor
-public class PersonalResponseResponse {
+public class PersonalExpenseResponse {
 
     private String expenseId;
     private String description;

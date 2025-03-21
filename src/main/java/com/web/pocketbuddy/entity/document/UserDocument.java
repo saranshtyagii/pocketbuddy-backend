@@ -71,4 +71,6 @@ public class UserDocument {
 
     private boolean isEmailVerified = false;
     private boolean isPhoneVerified = false;
+
+    private boolean isDeleted;
 }
