@@ -1,15 +1,13 @@
-package com.web.pocketbuddy.controller;
+package com.web.pocketbuddy.controller.helperController;
 
 import com.web.pocketbuddy.constants.ConstantsUrls;
 import com.web.pocketbuddy.constants.ConstantsVariables;
 import com.web.pocketbuddy.entity.dao.UserMasterDoa;
-import com.web.pocketbuddy.entity.document.Config;
 import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.exception.UserApiException;
 import com.web.pocketbuddy.service.mapper.MapperUtils;
 import com.web.pocketbuddy.service.response.ConfigService;
 import lombok.AllArgsConstructor;
-import org.apache.catalina.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;

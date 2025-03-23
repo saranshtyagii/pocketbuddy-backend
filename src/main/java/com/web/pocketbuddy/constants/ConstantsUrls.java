@@ -4,6 +4,7 @@ public class ConstantsUrls {
 
     private ConstantsUrls () {}
 
+    public static final String DOMAIN = "http://localhost:8069";
     public static final String HOST_URL = "/pocketbuddy";
     public static final String BASE_URL_V1 = HOST_URL + "/api/v1";
 

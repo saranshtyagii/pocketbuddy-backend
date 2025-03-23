@@ -40,6 +40,8 @@ public class WebSecurityConfig {
                         .requestMatchers(ConstantsUrls.BASE_URL_V1.concat("/status/**")).permitAll()
                         .requestMatchers(ConstantsUrls.CRM_URL.concat("/**")).permitAll()
                         .requestMatchers(ConstantsUrls.ADD_MOD_URL.concat("/**")).permitAll()
+                        .requestMatchers("/api/v1/static/**").permitAll()
+                        .requestMatchers("/UpdatePassword.html").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/swagger-ui.html").permitAll()

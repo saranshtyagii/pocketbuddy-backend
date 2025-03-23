@@ -20,6 +20,7 @@ public interface UserService {
     public String verifyMobileNumber(String mobile);
 
     public String verifyEmailOtp(String usernameOrEmail, String otp);
+    public String verifyEmailVerificationToken(String token);
 
     public UserDetailResponse updatePassword(UserCredentials userCredentials);
 
@@ -34,4 +35,8 @@ public interface UserService {
     public String deleteUser(String userId);
     public String deleteUserFromDb(String userId);
 
+
+    public String generateResetPasswordUrl(String usernameOrEmail);
+
+    public String generateEmailVerificationToken(String usernameOrEmail);
 }

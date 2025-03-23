@@ -55,27 +55,37 @@ public class AuthenticationController {
         return ResponseEntity.ok(MapperUtils.convertObjectToString(response));
     }
 
-    @PatchMapping("/forgot/password")
-    public ResponseEntity<String> generateOneTimePassword(@RequestParam String usernameOrEmail) {
-        return ResponseEntity.ok(userService.generateOneTimePassword(usernameOrEmail));
+    @PatchMapping("/forgot-password")
+    public ResponseEntity<String> generateResetPasswordUrl(@RequestParam String usernameOrEmail) {
+        return ResponseEntity.ok(userService.generateResetPasswordUrl(usernameOrEmail));
     }
 
-    @PatchMapping("/verify/email/otp")
+    @PatchMapping("/verify-email")
     public ResponseEntity<String> verifyOtp(@RequestParam String usernameOrEmail, @RequestParam String otp) {
         return ResponseEntity.ok(userService.verifyEmailOtp(usernameOrEmail, otp));
     }
 
-    @PostMapping("/update/password")
+    @PatchMapping("/verify-email-token")
+    public ResponseEntity<String> verifyOtpToken(@RequestParam String token) {
+        return ResponseEntity.ok(userService.verifyEmailVerificationToken(token));
+    }
+
+    @PatchMapping("/generate-email-verification-token")
+    public ResponseEntity<String> generateGenerateEmailVerificationToken(@RequestParam String usernameOrEmail) {
+        return ResponseEntity.ok(userService.generateEmailVerificationToken(usernameOrEmail));
+    }
+
+    @PostMapping("/update-password")
     public ResponseEntity<String> updatePassword(@RequestBody UserCredentials userCredentials) {
         return ResponseEntity.ok(MapperUtils.convertObjectToString(userService.updatePassword(userCredentials)));
     }
 
-    @PatchMapping("/generate/otp")
+    @PatchMapping("/generate-otp")
     public ResponseEntity<String> generateOtpForPhone(@RequestParam String mobileNumber) {
         return ResponseEntity.ok(userService.generateOneTimePasswordForMobile(mobileNumber));
     }
 
-    @PostMapping("/login/phone")
+    @PostMapping("/login-phone")
     public ResponseEntity<UserDetailResponse> loginByPhone(@RequestBody String mobileNumber) {
         return ResponseEntity.ok().build();
     }

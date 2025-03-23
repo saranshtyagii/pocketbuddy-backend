@@ -1,6 +1,6 @@
 package com.web.pocketbuddy.entity.document;
 
-import com.web.pocketbuddy.entity.helper.DeviceDetail;
+import com.web.pocketbuddy.entity.utility.DeviceDetail;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -73,4 +73,5 @@ public class UserDocument {
     private boolean isPhoneVerified = false;
 
     private boolean isDeleted;
+    private String forgotPasswordToken;
 }
