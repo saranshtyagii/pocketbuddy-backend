@@ -6,7 +6,6 @@ import com.web.pocketbuddy.payload.AddPersonalExpense;
 import com.web.pocketbuddy.payload.FindExpenseByDates;
 import com.web.pocketbuddy.service.PersonalExpenseService;
 import lombok.AllArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
