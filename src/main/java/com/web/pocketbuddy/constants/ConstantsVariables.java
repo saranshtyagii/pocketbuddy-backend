@@ -24,4 +24,6 @@ public class ConstantsVariables {
     public static final int MINIMUM_PASSWORD_LENGTH = 8;
 
 
+    public static final String EMAIL_IS_NOT_VERIFY = "Email is not verify";
+    public static final String INVALID_TOKEN = "Invalid token";
 }

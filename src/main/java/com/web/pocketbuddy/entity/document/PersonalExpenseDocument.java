@@ -20,11 +20,13 @@ public class PersonalExpenseDocument {
     @Id
     private String expenseId;
 
+    @NotNull(message = "userId can't be null")
     private String userId;
 
-    @NotNull
+    @NotNull(message = "expenseDescription can't be null")
     private String expenseDescription;
 
+    @CreatedDate
     private Date expenseDate;
 
     @LastModifiedDate
@@ -37,6 +39,6 @@ public class PersonalExpenseDocument {
     private String groupId;
     private String groupExpenseId;
 
-    @NotNull
+    @NotNull(message = "amount can't be null")
     private double amount;
 }

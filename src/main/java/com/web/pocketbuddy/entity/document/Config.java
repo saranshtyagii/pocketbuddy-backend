@@ -21,5 +21,6 @@ public class Config {
     private boolean crmEnabled;
     private String crmAccessToken;
     private String jwtSecretKey;
+    private boolean refershApplicationEnable;
 
 }

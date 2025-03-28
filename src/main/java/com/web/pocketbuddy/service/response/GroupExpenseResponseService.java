@@ -117,18 +117,13 @@ public class GroupExpenseResponseService implements GroupExpenseService {
             return "There is no group to delete.";
         }
 
-        // delete isDeleted Groups having date is greater than 30 days,
-        Date currentDate = new Date();
-        savedGroups.stream()
-                .filter(GroupDocument::isDeleted)
-                .forEach(groupDocument -> {
-                    if(groupDocument.getGroupDeletedDate().before(currentDate)) {
-                        groupDetailsMasterDoa.delete(groupDocument);
-                        groupExpenseMasterDoa.deleteByGroupId(groupDocument.getGroupId());
-                    }
-                });
+        savedGroups.parallelStream().forEach(group -> {
+            if(group.isDeleted()) {
+                groupDetailsMasterDoa.delete(group);
+            }
+        });
 
-        return "All the groups have been deleted which marked as deleted before Date: "+currentDate.toString();
+        return "All the groups have been deleted which marked as deleted";
     }
 
     @Override
