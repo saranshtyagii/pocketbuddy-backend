@@ -30,4 +30,6 @@ public interface UserService {
     public String updateMobileNumber(String mobileNumber, String usernameOrEmail);
 
     public String verifyPhoneNumber(String phoneNumber, String otp);
+
+    public void deleteUserFromDb(String id);
 }

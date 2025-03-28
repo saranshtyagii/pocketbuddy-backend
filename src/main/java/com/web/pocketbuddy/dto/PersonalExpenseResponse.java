@@ -2,12 +2,14 @@ package com.web.pocketbuddy.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 
 import java.util.Date;
 
 @Builder
 @AllArgsConstructor
-public class PersonalResponseResponse {
+@Getter
+public class PersonalExpenseResponse {
 
     private String expenseId;
     private String description;
