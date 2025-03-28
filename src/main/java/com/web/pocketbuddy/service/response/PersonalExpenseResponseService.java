@@ -1,7 +1,6 @@
 package com.web.pocketbuddy.service.response;
 
-import com.web.pocketbuddy.dto.PersonalResponseResponse;
-import com.web.pocketbuddy.dto.UserDetailResponse;
+import com.web.pocketbuddy.dto.PersonalExpenseResponse;
 import com.web.pocketbuddy.entity.dao.PersonalExpenseMasterDoa;
 import com.web.pocketbuddy.entity.document.PersonalExpenseDocument;
 import com.web.pocketbuddy.entity.document.UserDocument;
@@ -29,7 +28,7 @@ public class PersonalExpenseResponseService implements PersonalExpenseService {
     private final UserService userService;
 
     @Override
-    public PersonalResponseResponse addPersonalExpense(AddPersonalExpense expense) {
+    public PersonalExpenseResponse addPersonalExpense(AddPersonalExpense expense) {
         if(ObjectUtils.isEmpty(expense.getCreatedDate())) {
             expense.setCreatedDate(new Date());
         }
@@ -38,7 +37,7 @@ public class PersonalExpenseResponseService implements PersonalExpenseService {
     }
 
     @Override
-    public PersonalResponseResponse updatePersonalExpense(AddPersonalExpense expense) {
+    public PersonalExpenseResponse updatePersonalExpense(AddPersonalExpense expense) {
         PersonalExpenseDocument savedPersonalExpenseDocument = fetchPersonalExpenseDocumentById(expense.getExpenseID());
 
         savedPersonalExpenseDocument.setExpenseDescription(expense.getDescription());
@@ -60,7 +59,7 @@ public class PersonalExpenseResponseService implements PersonalExpenseService {
     }
 
     @Override
-    public PersonalResponseResponse getPersonalExpense(String id) {
+    public PersonalExpenseResponse getPersonalExpense(String id) {
         PersonalExpenseDocument personalExpenseDocument = fetchPersonalExpenseDocumentById(id);
         if(personalExpenseDocument.isDeleted()) {
             throw new UserPersonalExpenseException("No such expense found!", HttpStatus.NOT_FOUND);
@@ -69,18 +68,23 @@ public class PersonalExpenseResponseService implements PersonalExpenseService {
     }
 
     @Override
-    public List<PersonalResponseResponse> getPersonalExpensesInRange(FetchByDates data) {
+    public void deletePersonalExpenseFromDb(String expenseID) {
+        personalExpenseMasterDoa.delete(personalExpenseMasterDoa.findById(expenseID).orElseThrow(() -> new UserPersonalExpenseException("No such expense found!", HttpStatus.NOT_FOUND)));
+    }
+
+    @Override
+    public List<PersonalExpenseResponse> getPersonalExpensesInRange(FetchByDates data) {
 
         return List.of();
     }
 
     @Override
-    public List<PersonalResponseResponse> fetchAllPersonalExpense(String usernameOrEmail) {
+    public List<PersonalExpenseResponse> fetchAllPersonalExpense(String usernameOrEmail) {
         return List.of();
     }
 
     @Override
-    public List<PersonalResponseResponse> fetchAllPersonalExpenses() {
+    public List<PersonalExpenseResponse> fetchAllPersonalExpenses() {
         List<PersonalExpenseDocument> allPersonalExpenseDocuments = personalExpenseMasterDoa.findAll();
         return allPersonalExpenseDocuments.stream()
                 .filter((expense -> !expense.isDeleted()))
@@ -89,7 +93,7 @@ public class PersonalExpenseResponseService implements PersonalExpenseService {
     }
 
     @Override
-    public List<PersonalResponseResponse> fetchAllPersonalExpensesByUserId(String userId) {
+    public List<PersonalExpenseResponse> fetchAllPersonalExpensesByUserId(String userId) {
         List<PersonalExpenseDocument> savedPersonalExpense = personalExpenseMasterDoa.findByUserId(userId)
                 .orElse(null);
 

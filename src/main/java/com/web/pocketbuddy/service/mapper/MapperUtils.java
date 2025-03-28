@@ -68,8 +68,8 @@ public class MapperUtils {
                 .build();
     }
 
-    public static PersonalResponseResponse convertTOPersonalExpenseResponse(PersonalExpenseDocument save) {
-        return PersonalResponseResponse.builder()
+    public static PersonalExpenseResponse convertTOPersonalExpenseResponse(PersonalExpenseDocument save) {
+        return PersonalExpenseResponse.builder()
                 .expenseId(save.getExpenseId())
                 .description(save.getExpenseDescription())
                 .amount(save.getAmount())
