@@ -16,8 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -60,30 +58,6 @@ public class PersonalExpenseResponseService implements PersonalExpenseService {
     }
 
     @Override
-    public String deletePersonalExpenseFromDB(String apiKey, String expenseId) {
-        if(!apiKey.equals(ConstantsVariables.API_KEY)) {
-            throw new UserPersonalExpenseException("Invalid Api Key", HttpStatus.BAD_REQUEST);
-        }
-
-        if(!StringUtils.isEmpty(expenseId)) {
-            personalExpenseMasterDoa.delete(personalExpenseMasterDoa.findById(expenseId).orElseThrow(() -> new UserPersonalExpenseException("Expense not found", HttpStatus.NOT_FOUND)));
-            return "Expense ID: "+expenseId+" has been deleted";
-        }
-
-        List<PersonalExpenseDocument> savedPersonalExpenseDocuments = personalExpenseMasterDoa.findAll();
-        if(CollectionUtils.isEmpty(savedPersonalExpenseDocuments)) {
-            return "There is no personal expense to be deleted";
-        }
-
-        savedPersonalExpenseDocuments.parallelStream().forEach(expense -> {
-            if(expense.isDeleted()) {
-                personalExpenseMasterDoa.delete(expense);
-            }
-        });
-        return "All Expense has been deleted which marked as deleted";
-    }
-
-    @Override
     public PersonalExpenseResponse getPersonalExpense(String id) {
         PersonalExpenseDocument personalExpenseDocument = fetchPersonalExpenseDocumentById(id);
         if(personalExpenseDocument.isDeleted()) {
@@ -98,9 +72,14 @@ public class PersonalExpenseResponseService implements PersonalExpenseService {
     }
 
     @Override
-    public String deletePersonalExpenseFromDB(String apiKey) {
+    public String deletePersonalExpenseFromDB(String apiKey, String expenseId) {
         if(!apiKey.equals(ConstantsVariables.API_KEY)) {
             throw new UserPersonalExpenseException("Invalid Api Key", HttpStatus.BAD_REQUEST);
+        }
+
+        if(!StringUtils.isEmpty(expenseId)) {
+            personalExpenseMasterDoa.deleteById(expenseId);
+            return "Expense ID: "+expenseId+" has been deleted";
         }
 
         List<PersonalExpenseDocument> savedPersonalExpenseDocuments = personalExpenseMasterDoa.findAll();
