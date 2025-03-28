@@ -18,10 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +29,7 @@ public class PersonalExpenseResponseService implements PersonalExpenseService {
 
     @Override
     public PersonalExpenseResponse addPersonalExpense(AddPersonalExpense expense) {
-        PersonalExpenseDocument savedExpense = personalExpenseMasterDoa.save(MapperUtils.convertToPersonalExpenseDocument(expense));
+        PersonalExpenseDocument savedExpense = personalExpenseMasterDoa.save(Objects.requireNonNull(MapperUtils.convertToPersonalExpenseDocument(expense)));
         return MapperUtils.convertTOPersonalExpenseResponse(savedExpense);
     }
 
