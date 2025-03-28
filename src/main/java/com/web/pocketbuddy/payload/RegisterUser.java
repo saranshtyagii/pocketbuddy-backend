@@ -3,10 +3,12 @@ package com.web.pocketbuddy.payload;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
+@Builder
 public class RegisterUser {
 
     @NotNull

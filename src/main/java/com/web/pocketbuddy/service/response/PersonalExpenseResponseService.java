@@ -84,6 +84,11 @@ public class PersonalExpenseResponseService implements PersonalExpenseService {
     }
 
     @Override
+    public void deletePersonalExpenseFromDb(String expenseID) {
+        personalExpenseMasterDoa.delete(personalExpenseMasterDoa.findById(expenseID).orElseThrow(() -> new UserPersonalExpenseException("No such expense found!", HttpStatus.NOT_FOUND)));
+    }
+
+    @Override
     public List<PersonalExpenseResponse> getPersonalExpensesInRange(FindExpenseByDates datesData) {
 
         return List.of();

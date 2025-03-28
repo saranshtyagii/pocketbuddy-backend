@@ -1,5 +1,6 @@
 package com.web.pocketbuddy.entity.document;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
@@ -7,14 +8,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document
 @Getter
-@ToString
+@Builder
 public class Config {
-
-    public Config(boolean crmEnabled, String crmAccessToken, String jwtSecretKey) {
-        this.crmEnabled = crmEnabled;
-        this.crmAccessToken = crmAccessToken;
-        this.jwtSecretKey = jwtSecretKey;
-    }
 
     @Id
     private String id;

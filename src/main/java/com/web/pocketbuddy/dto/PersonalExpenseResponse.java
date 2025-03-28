@@ -1,6 +1,7 @@
 package com.web.pocketbuddy.dto;
 
 import lombok.*;
+import lombok.Getter;
 
 import java.util.Date;
 

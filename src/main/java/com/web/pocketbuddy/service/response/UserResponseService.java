@@ -276,6 +276,11 @@ public class UserResponseService implements UserService {
         return "Verification email send to: " + GenerateUtils.maskEmailAddress(savedUser.getEmail());
     }
 
+    @Override
+    public void deleteUserFromDb(String userID) {
+        userMasterDoa.delete(userMasterDoa.findById(userID).orElseThrow(() -> new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST)));
+    }
+
     private boolean isUsernameExist(String username) {
          UserDocument savedUser = userMasterDoa.findByUsername(username).orElse(null);
          return ObjectUtils.isEmpty(savedUser);
