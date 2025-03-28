@@ -12,7 +12,7 @@ public interface PersonalExpenseService {
     public PersonalExpenseResponse addPersonalExpense(AddPersonalExpense expense);
     public PersonalExpenseResponse updatePersonalExpense(AddPersonalExpense expense);
     public String deletePersonalExpense(String id);
-    public String deletePersonalExpenseFromDB(String apiKey);
+    public String deletePersonalExpenseFromDB(String apiKey, String expenseId);
     public PersonalExpenseResponse getPersonalExpense(String id);
 
     public List<PersonalExpenseResponse> getPersonalExpensesInRange(FindExpenseByDates datedData);

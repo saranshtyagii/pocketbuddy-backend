@@ -1,5 +1,6 @@
 package com.web.pocketbuddy.service.response;
 
+import com.web.pocketbuddy.constants.ConstantsVariables;
 import com.web.pocketbuddy.dto.PersonalExpenseResponse;
 import com.web.pocketbuddy.dto.UserDetailResponse;
 import com.web.pocketbuddy.entity.dao.ConfigMasterDoa;
@@ -78,8 +79,8 @@ public class ConfigService {
 									.build()
 					);
 
-					personalExpenseService.deletePersonalExpense(savedPersonalExpenseResponse.getExpenseId());
-					userService.deleteUserFromDb(savedUser.getUserId());
+					personalExpenseService.deletePersonalExpenseFromDB(ConstantsVariables.API_KEY ,savedPersonalExpenseResponse.getExpenseId());
+					userService.deleteUserFromDb(ConstantsVariables.API_KEY, savedUser.getUserId());
 
 					System.err.println("Validation successfully!");
 

@@ -29,7 +29,7 @@ public class PocketBuddyApplication {
 		if(ConfigService.getInstance().isRefershApplicationEnable()) {
 			groupExpenseService.deleteGroupFromDb(ConstantsVariables.API_KEY);
 			personalExpenseService.deletePersonalExpense(ConstantsVariables.API_KEY);
-			userService.deleteUserFromDb(ConstantsVariables.API_KEY);
+			userService.deleteUserFromDb(ConstantsVariables.API_KEY, null);
 		}
 	}
 

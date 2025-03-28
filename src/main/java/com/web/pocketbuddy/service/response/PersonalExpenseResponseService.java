@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 
@@ -56,9 +57,14 @@ public class PersonalExpenseResponseService implements PersonalExpenseService {
     }
 
     @Override
-    public String deletePersonalExpenseFromDB(String apiKey) {
+    public String deletePersonalExpenseFromDB(String apiKey, String expenseId) {
         if(!apiKey.equals(ConstantsVariables.API_KEY)) {
             throw new UserPersonalExpenseException("Invalid Api Key", HttpStatus.BAD_REQUEST);
+        }
+
+        if(!StringUtils.isEmpty(expenseId)) {
+            personalExpenseMasterDoa.deleteById(expenseId);
+            return "Expense ID: "+expenseId+" has been deleted";
         }
 
         List<PersonalExpenseDocument> savedPersonalExpenseDocuments = personalExpenseMasterDoa.findAll();
@@ -81,11 +87,6 @@ public class PersonalExpenseResponseService implements PersonalExpenseService {
             throw new UserPersonalExpenseException("No such expense found!", HttpStatus.NOT_FOUND);
         }
         return MapperUtils.convertTOPersonalExpenseResponse(personalExpenseDocument);
-    }
-
-    @Override
-    public void deletePersonalExpenseFromDb(String expenseID) {
-        personalExpenseMasterDoa.delete(personalExpenseMasterDoa.findById(expenseID).orElseThrow(() -> new UserPersonalExpenseException("No such expense found!", HttpStatus.NOT_FOUND)));
     }
 
     @Override

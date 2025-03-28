@@ -215,10 +215,15 @@ public class UserResponseService implements UserService {
     }
 
     @Override
-    public String deleteUserFromDb(String apiKey) {
+    public String deleteUserFromDb(String apiKey, String userId) {
 
         if(!apiKey.equals(ConstantsVariables.API_KEY)) {
             throw new UserApiException("Invalid Api Key", HttpStatus.BAD_REQUEST);
+        }
+
+        if(!StringUtils.isEmpty(userId)) {
+            userMasterDoa.deleteById(userId);
+            return "User ID: "+userId+" has been deleted";
         }
 
         List<UserDocument> savedUser = userMasterDoa.findAll();
@@ -274,11 +279,6 @@ public class UserResponseService implements UserService {
         notificationService.sendEmail(notification);
 
         return "Verification email send to: " + GenerateUtils.maskEmailAddress(savedUser.getEmail());
-    }
-
-    @Override
-    public void deleteUserFromDb(String userID) {
-        userMasterDoa.delete(userMasterDoa.findById(userID).orElseThrow(() -> new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST)));
     }
 
     private boolean isUsernameExist(String username) {

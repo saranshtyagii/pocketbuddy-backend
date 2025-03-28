@@ -33,7 +33,7 @@ public interface UserService {
     public String verifyPhoneNumber(String phoneNumber, String otp);
 
     public String deleteUser(String userId);
-    public String deleteUserFromDb(String userId);
+    public String deleteUserFromDb(String apiKey, String userId);
 
 
     public String generateResetPasswordUrl(String usernameOrEmail);
