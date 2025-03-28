@@ -6,6 +6,7 @@ import com.web.pocketbuddy.payload.AddPersonalExpense;
 import com.web.pocketbuddy.payload.FindExpenseByDates;
 import com.web.pocketbuddy.service.PersonalExpenseService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +19,7 @@ public class PersonalExpenseController {
 
     private final PersonalExpenseService personalExpenseService;
 
-    @GetMapping("/register")
+    @PostMapping("/register")
     public ResponseEntity<PersonalExpenseResponse> registerExpense(@RequestBody AddPersonalExpense expense) {
         return ResponseEntity.ok(personalExpenseService.addPersonalExpense(expense));
     }

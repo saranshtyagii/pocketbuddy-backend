@@ -33,7 +33,7 @@ public class PersonalExpenseResponseService implements PersonalExpenseService {
 
     @Override
     public PersonalExpenseResponse addPersonalExpense(AddPersonalExpense expense) {
-        PersonalExpenseDocument savedExpense = personalExpenseMasterDoa.save(MapperUtils.convertToPersonalExpenseDocument(expense));
+        PersonalExpenseDocument savedExpense = personalExpenseMasterDoa.save(Objects.requireNonNull(MapperUtils.convertToPersonalExpenseDocument(expense)));
         return MapperUtils.convertTOPersonalExpenseResponse(savedExpense);
     }
 
