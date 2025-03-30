@@ -65,6 +65,8 @@ public class MapperUtils {
                     .isUpdated(false)
                     .isDeleted(false)
                     .isExpenseFromGroup(false)
+                    .groupExpenseId(null)
+                    .groupId(null)
                     .amount(expense.getAmount())
                     .build();
         } catch (Exception e) {

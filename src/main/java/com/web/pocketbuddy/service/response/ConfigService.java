@@ -22,13 +22,16 @@ import java.util.List;
 public class ConfigService {
 
 	private final ConfigMasterDoa configMasterDoa;
-	private static Config config;
+	private static volatile Config config;
 	private final UserService userService;
 	private final PersonalExpenseService personalExpenseService;
 	private final GroupExpenseService groupExpenseService;
 
+	private boolean validationHappens = false;
+
 	@Autowired
-	public ConfigService(ConfigMasterDoa configMasterDoa, UserService userService, PersonalExpenseService personalExpenseService, GroupExpenseService groupExpenseService) {
+	public ConfigService(ConfigMasterDoa configMasterDoa, UserService userService,
+						 PersonalExpenseService personalExpenseService, GroupExpenseService groupExpenseService) {
 		this.configMasterDoa = configMasterDoa;
 		this.userService = userService;
 		this.personalExpenseService = personalExpenseService;
@@ -36,91 +39,84 @@ public class ConfigService {
 	}
 
 	@EventListener(ContextRefreshedEvent.class)
-	private void loadConfig() {
+    public void loadConfig() {
 		try {
-			validateResources();
-			List<Config> configs = configMasterDoa.findAll();
-			if(configs.isEmpty()) {
-				System.err.println("Config not found!");
-				setConfig();
+			if(!validationHappens) {
+				validateResources();
 			}
-			if (!configs.isEmpty()) {
+			List<Config> configs = configMasterDoa.findAll();
+
+			if (configs.isEmpty()) {
+				System.err.println("Config not found! Creating a new one...");
+				setConfig();
+			} else {
 				config = configs.get(0); // Load the first config
-				System.err.println("config has been loaded successfully:");
+				System.err.println("Config has been loaded successfully.");
 			}
 		} catch (Exception e) {
 			config = null;
-			System.err.println("Unable to load config: " + e.getMessage());
+			System.err.println("Unable to load config: {\n"+e.getMessage()+"\n}");
 		}
 	}
 
 	private void validateResources() {
+		Thread validationThread = new Thread(() -> {
+			try {
+				System.err.println("Validating Pocket Buddy MongoDB connections...");
+
+				UserDetailResponse savedUser = userService.registerUser(
+						RegisterUser.builder()
+								.userFirstName("Pocket")
+								.userLastName("Buddy")
+								.username("pocketbuddy")
+								.email("contact@pocketbuddy.app")
+								.mobileNumber("0000000000")
+								.password("pocketbuddy@123")
+								.build()
+				);
+
+				PersonalExpenseResponse savedPersonalExpense = personalExpenseService.addPersonalExpense(
+						AddPersonalExpense.builder()
+								.userID(savedUser.getUserId())
+								.description("Validation Pocket Buddy.")
+								.amount(10)
+								.build()
+				);
+
+				personalExpenseService.deletePersonalExpenseFromDB(ConstantsVariables.API_KEY, savedPersonalExpense.getExpenseId());
+				userService.deleteUserFromDb(ConstantsVariables.API_KEY, savedUser.getUserId());
+
+				System.err.println("Validation successful!");
+				validationHappens = true;
+			} catch (Exception e) {
+				System.err.println("Validation failed: {}");
+			}
+		});
+
+		validationThread.start();
 		try {
-			Thread checkMongoConnections = new Thread(() -> {
-				try {
-					System.err.println("Validating Pocket Buddy Mongo connections...");
-
-					UserDetailResponse savedUser = userService.registerUser(
-							RegisterUser.builder()
-									.userFirstName("Pocket")
-									.userLastName("Buddy")
-									.username("pocketbuddy")
-									.email("contact@pocketbuddy.app")
-									.mobileNumber("7011097691")
-									.password("pocketbuddy@123")
-									.build()
-					);
-
-					PersonalExpenseResponse savedPersonalExpenseResponse = personalExpenseService.addPersonalExpense(
-							AddPersonalExpense.builder()
-									.userID(savedUser.getUserId())
-									.description("Validation Pocket Buddy.")
-									.amount(10)
-									.build()
-					);
-
-					personalExpenseService.deletePersonalExpenseFromDB(ConstantsVariables.API_KEY ,savedPersonalExpenseResponse.getExpenseId());
-					userService.deleteUserFromDb(ConstantsVariables.API_KEY, savedUser.getUserId());
-
-					System.err.println("Validation successfully!");
-
-				} catch (Exception e) {
-					System.err.println("Validation failed: " + e.getMessage());
-					e.printStackTrace();
-				}
-			});
-
-			checkMongoConnections.start();
-			checkMongoConnections.join();
-
-		} catch (Exception e) {
-			throw new RuntimeException("Failed to validate resources", e);
+			validationThread.join(5000); // Prevent indefinite waiting
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new RuntimeException("Resource validation interrupted", e);
 		}
-	}
-
-
-	public static Config getConfig() {
-		if(config == null) {
-			throw new RuntimeException("Config not found!");
-		}
-		return config;
 	}
 
 	public static Config getInstance() {
-		try {
-			if (ObjectUtils.isEmpty(config)) {
-				throw new RuntimeException("Unable to fetch config from the server");
-			}
-			return config;
-		} catch (Exception e) {
-
-			return null;
-		}
+		return ObjectUtils.isEmpty(config) ? null : config;
 	}
 
-	public void setConfig() {
-		System.err.println("Creating new config... Please wait...");
-		configMasterDoa.save(Config.builder().build());
-	}
+	private void setConfig() {
+		System.err.println("Creating new default config...");
 
+		Config newConfig = Config.builder()
+				.crmEnabled(false)
+				.crmAccessToken("REPLACE_WITH_SECURE_VALUE") // Avoid hardcoded secrets
+				.jwtSecretKey("REPLACE_WITH_SECURE_VALUE")
+				.refreshApplicationEnable(false)
+				.build();
+
+		configMasterDoa.save(newConfig);
+		config = newConfig;
+	}
 }

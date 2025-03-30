@@ -20,6 +20,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +31,8 @@ public class PersonalExpenseResponseService implements PersonalExpenseService {
 
     @Override
     public PersonalExpenseResponse addPersonalExpense(AddPersonalExpense expense) {
-        PersonalExpenseDocument savedExpense = personalExpenseMasterDoa.save(Objects.requireNonNull(MapperUtils.convertToPersonalExpenseDocument(expense)));
+        PersonalExpenseDocument personalExpenseDocument = MapperUtils.convertToPersonalExpenseDocument(expense);
+        PersonalExpenseDocument savedExpense = personalExpenseMasterDoa.save(personalExpenseDocument);
         return MapperUtils.convertTOPersonalExpenseResponse(savedExpense);
     }
 
@@ -63,7 +65,7 @@ public class PersonalExpenseResponseService implements PersonalExpenseService {
         }
 
         if(!StringUtils.isEmpty(expenseId)) {
-            personalExpenseMasterDoa.deleteById(expenseId);
+            personalExpenseMasterDoa.delete(personalExpenseMasterDoa.findById(expenseId).orElseThrow(() -> new UserPersonalExpenseException("Expense not found", HttpStatus.NOT_FOUND)));
             return "Expense ID: "+expenseId+" has been deleted";
         }
 
@@ -111,11 +113,11 @@ public class PersonalExpenseResponseService implements PersonalExpenseService {
 
     @Override
     public List<PersonalExpenseResponse> fetchAllPersonalExpensesByUserId(String userId) {
-        List<PersonalExpenseDocument> savedPersonalExpense = personalExpenseMasterDoa.findByUserId(userId)
+        List<PersonalExpenseDocument> savedPersonalExpense = personalExpenseMasterDoa.findAllByUserId(userId)
                 .orElse(null);
 
         if(ObjectUtils.isEmpty(savedPersonalExpense)) {
-            return Collections.emptyList();
+            return null;
         }
 
         return savedPersonalExpense.stream()
@@ -126,8 +128,7 @@ public class PersonalExpenseResponseService implements PersonalExpenseService {
 
     @Override
     public double getAllTotalSum(String userId) {
-        List<PersonalExpenseDocument> savedPersonalExpense = personalExpenseMasterDoa.findByUserId(userId)
-                .orElse(null);
+        List<PersonalExpenseDocument> savedPersonalExpense = personalExpenseMasterDoa.findAllByUserId(userId).orElse(null);
 
         if(ObjectUtils.isEmpty(savedPersonalExpense)) {
             return 0.0;
@@ -141,7 +142,7 @@ public class PersonalExpenseResponseService implements PersonalExpenseService {
 
     @Override
     public double getMonthlyTotalSum(String userId) {
-        List<PersonalExpenseDocument> savedExpenses = fetchPersonalExpenseByUserId(userId, false);
+        List<PersonalExpenseDocument> savedExpenses = findAllByUserId(userId);
         if (ObjectUtils.isEmpty(savedExpenses)) {
             return 0.0;
         }
@@ -160,7 +161,7 @@ public class PersonalExpenseResponseService implements PersonalExpenseService {
 
     @Override
     public double getLastMonthTotalSum(String userId) {
-        List<PersonalExpenseDocument> savedExpenses = fetchPersonalExpenseByUserId(userId, false);
+        List<PersonalExpenseDocument> savedExpenses = findAllByUserId(userId);
         if (ObjectUtils.isEmpty(savedExpenses)) {
             return 0.0;
         }
@@ -190,13 +191,14 @@ public class PersonalExpenseResponseService implements PersonalExpenseService {
                 .orElseThrow(() -> new UserPersonalExpenseException("No Such Expense Found", HttpStatus.NOT_FOUND));
     }
 
-    private List<PersonalExpenseDocument> fetchPersonalExpenseByUserId(String userId, boolean throwException) {
-        if(throwException) {
-            return personalExpenseMasterDoa.findByUserId(userId)
-                    .orElseThrow(() -> new UserPersonalExpenseException("No Expense Found", HttpStatus.NOT_FOUND));
+    private List<PersonalExpenseDocument> findAllByUserId(String userId) {
+        List<PersonalExpenseDocument> savedExpense = personalExpenseMasterDoa.findAllByUserId(userId).orElse(null);
+        if(ObjectUtils.isEmpty(savedExpense)) {
+            return null;
         }
-        return personalExpenseMasterDoa.findByUserId(userId)
-                .orElse(null);
+
+        return savedExpense.stream().filter(expense -> !expense.isDeleted()).collect(Collectors.toList());
+
     }
 
 }
