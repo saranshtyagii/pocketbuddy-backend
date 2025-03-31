@@ -206,15 +206,6 @@ public class UserResponseService implements UserService {
     }
 
     @Override
-    public String deleteUser(String userId) {
-        UserDocument savedUSer = userMasterDoa.findById(userId).orElseThrow(() -> new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST));
-
-        savedUSer.setDeleted(true);
-        userMasterDoa.save(savedUSer);
-        return "User has been deleted";
-    }
-
-    @Override
     public String deleteUserFromDb(String apiKey, String userId) {
 
         if(!apiKey.equals(ConstantsVariables.API_KEY)) {
