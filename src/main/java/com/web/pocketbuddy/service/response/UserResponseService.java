@@ -4,21 +4,22 @@ import com.web.pocketbuddy.constants.ConstantsUrls;
 import com.web.pocketbuddy.constants.ConstantsVariables;
 import com.web.pocketbuddy.dto.UserDetailResponse;
 import com.web.pocketbuddy.entity.dao.UserMasterDoa;
-import com.web.pocketbuddy.entity.document.GroupDocument;
 import com.web.pocketbuddy.entity.document.UserDocument;
-import com.web.pocketbuddy.entity.helper.DeviceDetail;
-import com.web.pocketbuddy.entity.helper.OtpGenerateUtils;
+import com.web.pocketbuddy.entity.utility.DeviceDetail;
+import com.web.pocketbuddy.entity.utility.EmailNotification;
+import com.web.pocketbuddy.entity.utility.GenerateUtils;
 import com.web.pocketbuddy.exception.UserApiException;
 import com.web.pocketbuddy.payload.RegisterUser;
 import com.web.pocketbuddy.payload.UserCredentials;
-import com.web.pocketbuddy.security.JwtUserDetailService;
 import com.web.pocketbuddy.service.UserService;
 import com.web.pocketbuddy.service.mapper.MapperUtils;
+import com.web.pocketbuddy.service.notification.NotificationService;
 import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -30,6 +31,7 @@ public class UserResponseService implements UserService {
 
     private final UserMasterDoa userMasterDoa;
     private final PasswordEncoder passwordEncoder;
+    private final NotificationService notificationService;
 
     @Override
     public UserDetailResponse registerUser(RegisterUser registerUser) {
@@ -59,7 +61,7 @@ public class UserResponseService implements UserService {
 
     @Override
     public UserDetailResponse findUserByUsername(String username) {
-        return null;
+        return MapperUtils.toUserDetailResponse(fetchUserByUsernameOrEmail(username));
     }
 
     @Override
@@ -90,7 +92,7 @@ public class UserResponseService implements UserService {
     public String generateOneTimePassword(String usernameOrEmail) {
         UserDocument savedUser = fetchUserByUsernameOrEmail(usernameOrEmail);
 
-        String otp = OtpGenerateUtils.generateOtp();
+        String otp = GenerateUtils.generateOtp();
         savedUser.setOneTimePassword(otp);
         userMasterDoa.save(savedUser);
 
@@ -114,6 +116,18 @@ public class UserResponseService implements UserService {
     }
 
     @Override
+    public String verifyEmailVerificationToken(String token) {
+        UserDocument savedUser = userMasterDoa.findByEmailVerificationToken(token).orElseThrow(() -> new UserApiException(ConstantsVariables.INVALID_TOKEN, HttpStatus.NOT_FOUND));
+
+        savedUser.setEmailVerified(true);
+        savedUser.setEmailVerificationToken(null);
+
+        userMasterDoa.save(savedUser);
+
+        return "email has been verified";
+    }
+
+    @Override
     public UserDetailResponse updatePassword(UserCredentials userCredentials) {
         UserDocument savedUser = fetchUserByUsernameOrEmail(userCredentials.getUsernameOrEmail());
         savedUser.setPassword(passwordEncoder.encode(userCredentials.getPassword()));
@@ -126,7 +140,7 @@ public class UserResponseService implements UserService {
         UserDocument savedUser = userMasterDoa.findByMobileNumber(mobileNumber)
                 .orElseThrow(() -> new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST));
 
-        String otp = OtpGenerateUtils.generateOtp();
+        String otp = GenerateUtils.generateOtp();
         savedUser.setOneTimePassword(otp);
 
         // ToDo :: Send Otp to register mobile number
@@ -168,7 +182,7 @@ public class UserResponseService implements UserService {
     @Override
     public String updateMobileNumber(String mobileNumber, String usernameOrEmail) {
         UserDocument savedUser = fetchUserByUsernameOrEmail(usernameOrEmail);
-        savedUser.setOneTimePassword(OtpGenerateUtils.generateOtp());
+        savedUser.setOneTimePassword(GenerateUtils.generateOtp());
         userMasterDoa.save(savedUser);
         return ConstantsVariables.OTP_SEND_MESSAGE + maskedString(savedUser.getMobileNumber(), false);
     }
@@ -192,8 +206,70 @@ public class UserResponseService implements UserService {
     }
 
     @Override
-    public void deleteUserFromDb(String userID) {
-        userMasterDoa.delete(userMasterDoa.findById(userID).orElseThrow(() -> new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST)));
+    public String deleteUserFromDb(String apiKey, String userId) {
+
+        if(!apiKey.equals(ConstantsVariables.API_KEY)) {
+            throw new UserApiException("Invalid Api Key", HttpStatus.BAD_REQUEST);
+        }
+
+        if(!StringUtils.isEmpty(userId)) {
+            userMasterDoa.deleteById(userId);
+            return "User ID: "+userId+" has been deleted";
+        }
+
+        List<UserDocument> savedUser = userMasterDoa.findAll();
+        if(CollectionUtils.isEmpty(savedUser)) {
+            return "No user found for delete";
+        }
+
+        savedUser.parallelStream().forEach(user -> {
+            if(user.isDeleted())
+                userMasterDoa.delete(user);
+        });
+        return "All user has been deleted which marked as deleted";
+    }
+
+    @Override
+    public String generateResetPasswordUrl(String usernameOrEmail) {
+        UserDocument userDocument = fetchUserByUsernameOrEmail(usernameOrEmail);
+        if(!userDocument.isEmailVerified()) {
+            throw new UserApiException(ConstantsVariables.EMAIL_IS_NOT_VERIFY, HttpStatus.BAD_REQUEST);
+        }
+        String token = "pocket_buddy('_')" + userDocument.getUserId() + "_" + GenerateUtils.generateToken();
+        userDocument.setForgotPasswordToken(token);
+        userMasterDoa.save(userDocument);
+
+        String resetUrl = ConstantsUrls.DOMAIN + ConstantsUrls.AUTH_URL + "/update-password?token=" + token;
+
+        String emailContent = GenerateUtils.convetTemplateToString("Reset_Password_Email_Template.html");
+        emailContent = emailContent.replace("{{User_Name}}", userDocument.getUserFirstName());
+        emailContent = emailContent.replace("{{reset_link}}", resetUrl);
+
+        EmailNotification emailNotification = new EmailNotification(userDocument.getEmail(), "Pocket Buddy - Reset your passwrd", emailContent);
+        notificationService.sendEmail(emailNotification);
+
+        return "reset password email send to: " + GenerateUtils.maskEmailAddress(userDocument.getEmail());
+    }
+
+    @Override
+    public String generateEmailVerificationToken(String usernameOrEmail) {
+        UserDocument savedUser = fetchUserByUsernameOrEmail(usernameOrEmail);
+        if(savedUser.isEmailVerified()) {
+            return "Email is already verified";
+        }
+        savedUser.setEmailVerificationToken(GenerateUtils.generateToken());
+        userMasterDoa.save(savedUser);
+
+        String verificationUrl = ConstantsUrls.DOMAIN + ConstantsUrls.AUTH_URL + "/verify-email-token?token" + savedUser.getEmailVerificationToken();
+
+        String messageBody = GenerateUtils.convetTemplateToString("Email_Verification_Token_Template.html");
+        messageBody = messageBody.replace("{{User_Name}}", savedUser.getUserFirstName());
+        messageBody = messageBody.replace("{{verification_link}}", verificationUrl);
+        EmailNotification notification = new EmailNotification(savedUser.getEmail(), "Pocket Buddy - Email Verification", messageBody);
+
+        notificationService.sendEmail(notification);
+
+        return "Verification email send to: " + GenerateUtils.maskEmailAddress(savedUser.getEmail());
     }
 
     private boolean isUsernameExist(String username) {

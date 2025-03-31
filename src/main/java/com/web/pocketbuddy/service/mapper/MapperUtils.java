@@ -57,27 +57,41 @@ public class MapperUtils {
     }
 
     public static PersonalExpenseDocument convertToPersonalExpenseDocument(AddPersonalExpense expense) {
-        return PersonalExpenseDocument.builder()
-                .userId(expense.getUserID())
-                .expenseDescription(expense.getDescription())
-                .amount(expense.getAmount())
-                .isUpdated(false)
-                .isDeleted(false)
-                .isExpenseFromGroup(false)
-                .amount(expense.getAmount())
-                .build();
+        try {
+            return PersonalExpenseDocument.builder()
+                    .userId(expense.getUserID())
+                    .expenseDescription(expense.getDescription())
+                    .amount(expense.getAmount())
+                    .isUpdated(false)
+                    .isDeleted(false)
+                    .isExpenseFromGroup(false)
+                    .groupExpenseId(null)
+                    .groupId(null)
+                    .amount(expense.getAmount())
+                    .build();
+        } catch (Exception e) {
+            System.out.println("Unable to convert add personal expense to personal expense document");
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static PersonalExpenseResponse convertTOPersonalExpenseResponse(PersonalExpenseDocument save) {
-        return PersonalExpenseResponse.builder()
-                .expenseId(save.getExpenseId())
-                .description(save.getExpenseDescription())
-                .amount(save.getAmount())
-                .expenseDate(save.getExpenseDate())
-                .updatedDate(save.getLastModifiedDate())
-                .isEdited(save.isUpdated())
-                .isDeleted(save.isDeleted())
-                .build();
+        try {
+            return PersonalExpenseResponse.builder()
+                    .expenseId(save.getExpenseId())
+                    .description(save.getExpenseDescription())
+                    .amount(save.getAmount())
+                    .expenseDate(save.getExpenseDate())
+                    .updatedDate(save.getLastModifiedDate())
+                    .isEdited(save.isUpdated())
+                    .isDeleted(save.isDeleted())
+                    .build();
+        } catch (Exception e) {
+            System.out.println("Unable to convert to personal expense response");
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static GroupDocument convertToGroupDocument(GroupRegisterDetails expense) {

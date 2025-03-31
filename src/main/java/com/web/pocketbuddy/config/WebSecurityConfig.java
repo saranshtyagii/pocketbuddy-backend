@@ -5,6 +5,7 @@ import com.web.pocketbuddy.security.JwtRequestFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @RequiredArgsConstructor
+@EnableMongoAuditing
 public class WebSecurityConfig {
 
     private final JwtRequestFilter jwtRequestFilter;
@@ -40,6 +42,8 @@ public class WebSecurityConfig {
                         .requestMatchers(ConstantsUrls.BASE_URL_V1.concat("/status/**")).permitAll()
                         .requestMatchers(ConstantsUrls.CRM_URL.concat("/**")).permitAll()
                         .requestMatchers(ConstantsUrls.ADD_MOD_URL.concat("/**")).permitAll()
+                        .requestMatchers("/api/v1/static/**").permitAll()
+                        .requestMatchers("/UpdatePassword.html").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/swagger-ui.html").permitAll()

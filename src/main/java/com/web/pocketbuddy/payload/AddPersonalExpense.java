@@ -17,6 +17,5 @@ public class AddPersonalExpense {
     private String expenseID;
     private String description;
     private double amount;
-    private Date createdDate;
 
 }

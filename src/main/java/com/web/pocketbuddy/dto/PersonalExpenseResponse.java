@@ -1,14 +1,16 @@
 package com.web.pocketbuddy.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import lombok.*;
 import lombok.Getter;
 
 import java.util.Date;
 
+@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
-@Getter
+@NoArgsConstructor
 public class PersonalExpenseResponse {
 
     private String expenseId;

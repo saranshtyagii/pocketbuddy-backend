@@ -1,4 +1,4 @@
-package com.web.pocketbuddy.entity.helper;
+package com.web.pocketbuddy.entity.utility;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
