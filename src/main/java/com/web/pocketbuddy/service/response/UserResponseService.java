@@ -219,6 +219,14 @@ public class UserResponseService implements UserService {
         return "Email verified";
     }
 
+    @Override
+    public void saveOrUpdate(UserDocument savedUser) {
+        if(ObjectUtils.isEmpty(savedUser)) {
+            throw new UserApiException("Saved User Can't be null or empty", HttpStatus.BAD_REQUEST);
+        }
+        userMasterDoa.save(savedUser);
+    }
+
     private boolean isUsernameExist(String username) {
          UserDocument savedUser = userMasterDoa.findByUsername(username).orElse(null);
          return ObjectUtils.isEmpty(savedUser);

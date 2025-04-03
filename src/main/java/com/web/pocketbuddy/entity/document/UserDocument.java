@@ -57,7 +57,7 @@ public class UserDocument {
     // Id - token || value - Device Detail (Device Id - Model Name)
     Map<String, DeviceDetail> listOfLoginDevices;
 
-    private List<GroupDocument> userJoinGroup;
+    private List<String> userJoinGroupId;
 
     private double userMonthlyBudget;
     private double userMonthlyExpense;

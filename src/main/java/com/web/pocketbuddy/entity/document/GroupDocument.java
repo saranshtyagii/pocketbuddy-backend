@@ -32,7 +32,7 @@ public class GroupDocument {
     @NotNull
     private String createdByUser;
 
-    private Map<String, String> members;
+    private Map<String, Double> joinedMembersWithExpenseAmount;
 
     private SettlementCycle settlementCycle;
 
@@ -44,7 +44,5 @@ public class GroupDocument {
 
     private boolean deleted;
     private Date groupDeletedDate;
-
-
 
 }

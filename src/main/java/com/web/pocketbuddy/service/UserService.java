@@ -4,8 +4,6 @@ import com.web.pocketbuddy.dto.UserDetailResponse;
 import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.payload.RegisterUser;
 import com.web.pocketbuddy.payload.UserCredentials;
-import com.web.pocketbuddy.security.JwtUserDetailService;
-import org.springframework.http.ProblemDetail;
 
 public interface UserService {
 
@@ -35,4 +33,7 @@ public interface UserService {
     public void deleteUserFromDb(String id);
 
     String verifyEmailWithToken(String token);
+
+    void saveOrUpdate(UserDocument savedUser);
+
 }

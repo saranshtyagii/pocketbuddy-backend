@@ -1,11 +1,14 @@
 package com.web.pocketbuddy.service.response;
 
 import com.web.pocketbuddy.constants.ConstantsVariables;
+import com.web.pocketbuddy.dto.GroupDetailsResponse;
 import com.web.pocketbuddy.dto.PersonalExpenseResponse;
 import com.web.pocketbuddy.dto.UserDetailResponse;
 import com.web.pocketbuddy.entity.dao.ConfigMasterDoa;
 import com.web.pocketbuddy.entity.document.Config;
+import com.web.pocketbuddy.entity.document.GroupDocument;
 import com.web.pocketbuddy.payload.AddPersonalExpense;
+import com.web.pocketbuddy.payload.GroupRegisterDetails;
 import com.web.pocketbuddy.payload.RegisterUser;
 import com.web.pocketbuddy.service.GroupExpenseService;
 import com.web.pocketbuddy.service.PersonalExpenseService;
@@ -79,6 +82,15 @@ public class ConfigService {
 									.build()
 					);
 
+					GroupDetailsResponse groupDocument = groupExpenseService.createGroup(
+							GroupRegisterDetails.builder()
+									.groupName("Pocket Buddy")
+									.description("Validation Pocket Buddy")
+									.createdByUser(savedUser.getUserId())
+									.build()
+					);
+
+					groupExpenseService.deleteGroupFromDB(ConstantsVariables.API_KEY, groupDocument.getGroupId(), savedUser.getUserId());
 					personalExpenseService.deletePersonalExpenseFromDb(ConstantsVariables.API_KEY, savedPersonalExpenseResponse.getExpenseId());
 					userService.deleteUserFromDb(savedUser.getUserId());
 

@@ -9,12 +9,10 @@ import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.payload.AddPersonalExpense;
 import com.web.pocketbuddy.payload.GroupRegisterDetails;
 import com.web.pocketbuddy.payload.RegisterUser;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 
-@Slf4j
 public class MapperUtils {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -50,7 +48,6 @@ public class MapperUtils {
         try {
             return objectMapper.writeValueAsString(response);
         } catch (Exception e) {
-            log.error(e.getMessage());
             return null;
         }
 
@@ -107,8 +104,8 @@ public class MapperUtils {
                 .groupName(savedGroupDocument.getGroupName())
                 .groupDescription(savedGroupDocument.getDescription())
                 .createdByUserId(savedGroupDocument.getCreatedByUser())
-                .createdAt(savedGroupDocument.getCreateDate())
-                .joinedMembers(savedGroupDocument.getMembers())
+                .createdDate(savedGroupDocument.getCreateDate())
+                .joinedMembersWithExpenseAmount(savedGroupDocument.getJoinedMembersWithExpenseAmount())
                 .build();
 
     }

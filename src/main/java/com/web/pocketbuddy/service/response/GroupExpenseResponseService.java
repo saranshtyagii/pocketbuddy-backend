@@ -2,12 +2,10 @@ package com.web.pocketbuddy.service.response;
 
 import com.web.pocketbuddy.constants.ConstantsVariables;
 import com.web.pocketbuddy.dto.GroupDetailsResponse;
-import com.web.pocketbuddy.dto.GroupExpensesDto;
-import com.web.pocketbuddy.entity.dao.GroupExpenseDetailsMasterDoa;
-import com.web.pocketbuddy.entity.dao.GroupExpenseMasterDoa;
+import com.web.pocketbuddy.entity.dao.GroupDetailsMasterDoa;
 import com.web.pocketbuddy.entity.document.GroupDocument;
-import com.web.pocketbuddy.entity.document.GroupExpenseDocument;
 import com.web.pocketbuddy.entity.document.UserDocument;
+import com.web.pocketbuddy.exception.AuthenticationException;
 import com.web.pocketbuddy.exception.GroupApiExceptions;
 import com.web.pocketbuddy.payload.GroupRegisterDetails;
 import com.web.pocketbuddy.service.GroupExpenseService;
@@ -17,168 +15,180 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class GroupExpenseResponseService implements GroupExpenseService {
 
+    private final GroupDetailsMasterDoa groupExpenseMasterDoa;
     private final UserService userService;
-    private final GroupExpenseDetailsMasterDoa groupDetailsMasterDoa;
-    private final GroupExpenseMasterDoa groupExpenseMasterDoa;
 
     @Override
-    public GroupDetailsResponse registerGroup(GroupRegisterDetails registerDetails) {
-        GroupDocument groupDocument = MapperUtils.convertToGroupDocument(registerDetails);
-        groupDocument.setDeleted(false);
-        Map<String, String> joinedMembersMap = new HashMap<>();
-        UserDocument savedUser = userService.findUserById(registerDetails.getCreatedByUser());
-        String fullName = savedUser.getUserFirstName() + " " + savedUser.getUserLastName();
-        joinedMembersMap.put(registerDetails.getCreatedByUser(), fullName);
-        groupDocument.setMembers(joinedMembersMap);
+    public GroupDetailsResponse createGroup(GroupRegisterDetails request) {
+        GroupDocument groupDetailsResponse = MapperUtils.convertToGroupDocument(request);
+        Map<String, Double> joinMembers = new HashMap<>();
+        joinMembers.put(request.getCreatedByUser(), 0.00);
 
-        GroupDocument savedGroupDocument = groupDetailsMasterDoa.save(groupDocument);
-
-        return MapperUtils.convertGroupDetailResponse(savedGroupDocument);
-    }
-
-    @Override
-    public GroupDetailsResponse getGroupDetails(String groupId) {
-        return null;
-    }
-
-    @Override
-    public GroupDetailsResponse updateGroupDetails(String groupId, GroupDetailsResponse groupDetailsResponse) {
-        return null;
-    }
-
-    @Override
-    public String deleteGroup(String groupId, String userId) {
-        GroupDocument savedGroup = fetchGroupDocument(groupId);
-        if(!userId.equals(savedGroup.getCreatedByUser())) {
-            throw new GroupApiExceptions("You don't have a right to delete this Group.", HttpStatus.FORBIDDEN);
-        }
-        savedGroup.setDeleted(true);
-        savedGroup.setGroupDeletedDate(new Date());
-        groupDetailsMasterDoa.save(savedGroup);
-        return "Group " + groupId + " has been deleted";
-    }
-
-    @Override
-    public GroupDetailsResponse joinGroup(String groupId, String userId) {
-        GroupDocument savedGroup = fetchGroupDocument(groupId);
-
-        if(savedGroup.getMembers().containsKey(userId)) {
-            throw new GroupApiExceptions("You already become a members of that Group", HttpStatus.BAD_REQUEST);
+        UserDocument savedUser = userService.findUserById(request.getCreatedByUser());
+        List<String> joinedGroups = savedUser.getUserJoinGroupId();
+        if(CollectionUtils.isEmpty(joinedGroups)) {
+            joinedGroups = new ArrayList<>();
+            joinedGroups.add(request.getCreatedByUser());
+            savedUser.setUserJoinGroupId(joinedGroups);
+            userService.saveOrUpdate(savedUser);
         }
 
-        Map<String, String> joinedMembersMap = savedGroup.getMembers();
-        if(ObjectUtils.isEmpty(joinedMembersMap)) {
-            joinedMembersMap = new HashMap<>();
-        }
+        groupDetailsResponse.setJoinedMembersWithExpenseAmount(joinMembers);
+        return MapperUtils.convertGroupDetailResponse(groupExpenseMasterDoa.save(groupDetailsResponse));
+    }
+
+    @Override
+    public List<GroupDetailsResponse> findAllGroups(String userId) {
+
         UserDocument savedUser = userService.findUserById(userId);
-        String fullName = savedUser.getUserFirstName() + " " + savedUser.getUserLastName();
 
-        joinedMembersMap.put(userId, fullName);
-        savedGroup.setMembers(joinedMembersMap);
-
-        List<GroupDocument> userJoinGroup = savedUser.getUserJoinGroup();
-        if(userJoinGroup == null) {
-            userJoinGroup = new ArrayList<>();
+        List<String> joinedGroups = savedUser.getUserJoinGroupId();
+        if(CollectionUtils.isEmpty(joinedGroups)) {
+            return new ArrayList<>();
         }
 
-        GroupDocument updateGroupDetails = groupDetailsMasterDoa.save(savedGroup);
-        userJoinGroup.add(updateGroupDetails);
+        List<GroupDetailsResponse> groupsList = new ArrayList<>();
 
-        return MapperUtils.convertGroupDetailResponse(updateGroupDetails);
-    }
+        joinedGroups.stream().map(groupId -> {
+            GroupDocument groupDocument = findGroupAsGroupDocumentById(groupId);
+            if(!groupDocument.isDeleted()) {
+                groupsList.add(MapperUtils.convertGroupDetailResponse(groupDocument));
+            }
+            return null;
+        });
 
-    @Override
-    public List<GroupDetailsResponse> getAllGroups(String userId) {
-        return List.of();
+        return groupsList;
     }
 
     @Override
     public GroupDetailsResponse findGroupById(String groupId) {
-        GroupDocument groupDocument = fetchGroupDocument(groupId);
-        return MapperUtils.convertGroupDetailResponse(groupDocument);
+        return MapperUtils.convertGroupDetailResponse(findGroupAsGroupDocumentById(groupId));
     }
 
     @Override
-    public String deleteGroupFromDb(String apiKey) {
-        if(!apiKey.equals(ConstantsVariables.API_KEY)) {
-            throw new GroupApiExceptions("Its not that easy :D", HttpStatus.FORBIDDEN);
-        }
-        List<GroupDocument> savedGroups = groupDetailsMasterDoa.findAll();
+    public List<GroupDetailsResponse> findGroupByName(String groupName) {
+        List<GroupDocument> savedGroups = groupExpenseMasterDoa.findAllByGroupName(groupName)
+                .orElseThrow(() -> new GroupApiExceptions("No Such Group Found with name: "+groupName, HttpStatus.NOT_FOUND));
 
-        if(CollectionUtils.isEmpty(savedGroups)) {
-            return "There is no group to delete.";
-        }
-
-        // delete isDeleted Groups having date is greater than 30 days,
-        Date currentDate = new Date();
-        savedGroups.stream()
-                .filter(GroupDocument::isDeleted)
-                .forEach(groupDocument -> {
-                    if(groupDocument.getGroupDeletedDate().before(currentDate)) {
-                        groupDetailsMasterDoa.delete(groupDocument);
-                        groupExpenseMasterDoa.deleteByGroupId(groupDocument.getGroupId());
-                    }
-                });
-
-        return "All the groups have been deleted which marked as deleted before Date: "+currentDate.toString();
+        return savedGroups.stream()
+                .filter(groupDocument -> !groupDocument.isDeleted())
+                .map(MapperUtils::convertGroupDetailResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<GroupExpensesDto> findGroupExpensesByGroupId(String groupId) {
-        List<GroupExpenseDocument> savedExpenses = findNonDeletedGroupExpenses(groupId);
-        if(CollectionUtils.isEmpty(savedExpenses)) {
-            return new ArrayList<>();
-        }
-        return savedExpenses.stream().filter(expense -> !expense.getIsDeleted())
-                .map(MapperUtils::toGroupExpensesDto)
-                .toList();
-    }
-
-    @Override
-    public String markExpenseAsDeleted(String expenseId, String userId) {
-        GroupDocument savedGroup = fetchGroupDocument(expenseId);
-        if(!userId.equals(savedGroup.getCreatedByUser())) {
-            throw new GroupApiExceptions("You don't have a right to delete this Group.", HttpStatus.FORBIDDEN);
+    public String deleteGroup(String userId, String groupId) {
+        GroupDocument savedGroup = findGroupAsGroupDocumentById(groupId);
+        if(!savedGroup.getCreatedByUser().equals(userId)) {
+            throw new GroupApiExceptions("You don't have a delete right", HttpStatus.FORBIDDEN);
         }
         savedGroup.setDeleted(true);
-        savedGroup.setGroupDeletedDate(new Date());
-        savedGroup.setLastUpdateDate(new Date());
-
-        groupDetailsMasterDoa.save(savedGroup);
-        return "Expense " + expenseId + " has been deleted";
+        groupExpenseMasterDoa.save(savedGroup);
+        return "Group successfully deleted";
     }
 
     @Override
-    public List<GroupExpensesDto> addExpense(GroupExpensesDto groupExpensesDto) {
-        GroupExpenseDocument expenseDocument = MapperUtils.convertToGroupExpenseDocument(groupExpensesDto);
-        return findNonDeletedGroupExpenses(expenseDocument.getGroupId()).stream().map(MapperUtils::toGroupExpensesDto).toList();
+    public GroupDetailsResponse updateGroup(String groupId) {
+        return null;
     }
 
-    public GroupDocument fetchGroupDocument(String groupId) {
-        return groupDetailsMasterDoa.findById(groupId)
-                .orElseThrow(() -> new GroupApiExceptions("No Such Group Found!", HttpStatus.NOT_FOUND));
-    }
+    @Override
+    public GroupDetailsResponse joinGroup(String userId, String groupId) {
+        UserDocument savedUser = userService.findUserById(userId);
+        GroupDocument savedGroup = findGroupAsGroupDocumentById(groupId);
 
-    private GroupExpenseDocument findGroupExpenseById(String expenseId) {
-        return groupExpenseMasterDoa.findById(expenseId)
-                .orElseThrow(() -> new GroupApiExceptions("No Such Expense Found!", HttpStatus.NOT_FOUND));
-    }
-
-    private List<GroupExpenseDocument> findNonDeletedGroupExpenses(String groupId) {
-        List<GroupExpenseDocument> saved = groupExpenseMasterDoa.findByGroupId(groupId)
-                .orElse(null);
-        if(CollectionUtils.isEmpty(saved)) {
-            return saved;
+        Map<String, Double> joinMembers = savedGroup.getJoinedMembersWithExpenseAmount();
+        if(CollectionUtils.isEmpty(joinMembers)) {
+            joinMembers = new HashMap<>();
+            joinMembers.put(savedUser.getUserId(), 0.00);
+            savedGroup.setJoinedMembersWithExpenseAmount(joinMembers);
         }
-        return saved.stream().filter(expense -> !expense.getIsDeleted()).toList();
+
+        List<String> joinList = savedUser.getUserJoinGroupId();
+        if(CollectionUtils.isEmpty(joinList)) {
+            joinList = new ArrayList<>();
+            joinList.add(groupId);
+            savedUser.setUserJoinGroupId(joinList);
+            userService.saveOrUpdate(savedUser);
+        }
+
+        return MapperUtils.convertGroupDetailResponse(groupExpenseMasterDoa.save(savedGroup));
     }
 
+    @Override
+    public String leaveGroup(String userId, String groupId) {
+
+        UserDocument savedUser = userService.findUserById(userId);
+        List<String> joinedGroups = savedUser.getUserJoinGroupId();
+        if(!CollectionUtils.isEmpty(joinedGroups)) {
+            joinedGroups.remove(groupId);
+        }
+
+        return "Group successfully Leaved";
+    }
+
+    @Override
+    public void deleteGroupFromDB(String ApiKey, String groupId, String userId) {
+        if(!ConstantsVariables.API_KEY.equals(ApiKey)) {
+            throw new AuthenticationException("Invalid Api Key", HttpStatus.UNAUTHORIZED);
+        }
+
+        if(!StringUtils.isEmpty(groupId)) {
+            if(!StringUtils.isEmpty(userId)) {
+                leaveGroup(userId, groupId);
+            }
+            groupExpenseMasterDoa.deleteById(groupId);
+            return;
+        }
+
+        List<GroupDocument> allGroups = groupExpenseMasterDoa.findAll();
+        if(CollectionUtils.isEmpty(allGroups)) {
+            return;
+        }
+
+        allGroups.parallelStream().forEach(group -> {
+            if(group.isDeleted()) {
+                Map<String, Double> joinMembers = group.getJoinedMembersWithExpenseAmount();
+                if(!CollectionUtils.isEmpty(joinMembers)) {
+                    for(Map.Entry<String, Double> entry : joinMembers.entrySet()) {
+                        leaveGroup(entry.getKey(), group.getGroupId());
+                    }
+                }
+                groupExpenseMasterDoa.delete(group);
+            }
+        });
+    }
+
+    @Override
+    public GroupDetailsResponse recoverDeletedGroup(String userId, String groupId) {
+        GroupDocument savedGroup;
+        try {
+            savedGroup = findGroupAsGroupDocumentById(groupId);
+        } catch (Exception e) {
+            throw new GroupApiExceptions("Sorry we can't able to recover your group!", HttpStatus.BAD_REQUEST);
+        }
+
+        if(!userId.equals(savedGroup.getCreatedByUser())) {
+            throw new GroupApiExceptions("You are not group admin", HttpStatus.FORBIDDEN);
+        }
+
+        savedGroup.setDeleted(false);
+        return MapperUtils.convertGroupDetailResponse(savedGroup);
+    }
+
+
+    private GroupDocument findGroupAsGroupDocumentById(String groupId) {
+        return groupExpenseMasterDoa.findById(groupId)
+                .orElseThrow(() ->
+                        new GroupApiExceptions("No Such Group Found", HttpStatus.BAD_REQUEST));
+    }
 }
