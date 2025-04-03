@@ -1,9 +1,8 @@
 package com.web.pocketbuddy.controller.user;
 
-import com.web.pocketbuddy.constants.ConstantsUrls;
+import com.web.pocketbuddy.constants.UrlsConstants;
 import com.web.pocketbuddy.dto.TokenResponse;
 import com.web.pocketbuddy.dto.UserDetailResponse;
-import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.exception.UserApiException;
 import com.web.pocketbuddy.payload.RegisterUser;
 import com.web.pocketbuddy.payload.UserCredentials;
@@ -11,7 +10,6 @@ import com.web.pocketbuddy.security.JwtTokenUtils;
 import com.web.pocketbuddy.security.JwtUserDetailService;
 import com.web.pocketbuddy.service.UserService;
 import com.web.pocketbuddy.service.mapper.MapperUtils;
-import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(ConstantsUrls.AUTH_URL)
+@RequestMapping(UrlsConstants.AUTH_URL)
 public class AuthenticationController {
 
     private final UserService userService;
@@ -78,6 +76,11 @@ public class AuthenticationController {
     @PostMapping("/login/phone")
     public ResponseEntity<UserDetailResponse> loginByPhone(@RequestBody String mobileNumber) {
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/verify/email")
+    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
+        return ResponseEntity.ok(userService.verifyEmailWithToken(token));
     }
 
 

@@ -5,6 +5,7 @@ import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.payload.RegisterUser;
 import com.web.pocketbuddy.payload.UserCredentials;
 import com.web.pocketbuddy.security.JwtUserDetailService;
+import org.springframework.http.ProblemDetail;
 
 public interface UserService {
 
@@ -32,4 +33,6 @@ public interface UserService {
     public String verifyPhoneNumber(String phoneNumber, String otp);
 
     public void deleteUserFromDb(String id);
+
+    String verifyEmailWithToken(String token);
 }

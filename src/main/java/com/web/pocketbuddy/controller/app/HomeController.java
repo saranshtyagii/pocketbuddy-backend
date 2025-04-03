@@ -1,8 +1,7 @@
 package com.web.pocketbuddy.controller.app;
 
-import com.web.pocketbuddy.constants.ConstantsUrls;
+import com.web.pocketbuddy.constants.UrlsConstants;
 import com.web.pocketbuddy.entity.tracking.ThreadContextUtils;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(ConstantsUrls.BASE_URL_V1)
+@RequestMapping(UrlsConstants.BASE_URL_V1)
 public class HomeController {
 
     @GetMapping("/native")

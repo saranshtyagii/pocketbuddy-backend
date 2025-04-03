@@ -1,9 +1,10 @@
 package com.web.pocketbuddy.constants;
 
-public class ConstantsUrls {
+public class UrlsConstants {
 
-    private ConstantsUrls () {}
+    private UrlsConstants() {}
 
+    public static final String HOST_HTTP_BASE_URL = "http://192.168.1.8:8069";
     public static final String HOST_URL = "/pocketbuddy";
     public static final String BASE_URL_V1 = HOST_URL + "/api/v1";
 

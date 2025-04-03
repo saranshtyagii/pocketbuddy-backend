@@ -1,15 +1,14 @@
 package com.web.pocketbuddy.controller.user;
 
-import com.web.pocketbuddy.constants.ConstantsUrls;
+import com.web.pocketbuddy.constants.UrlsConstants;
 import com.web.pocketbuddy.dto.UserDetailResponse;
 import com.web.pocketbuddy.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.mongodb.repository.Update;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(ConstantsUrls.USER_URL)
+@RequestMapping(UrlsConstants.USER_URL)
 @RequiredArgsConstructor
 public class UserController {
 
@@ -39,8 +38,5 @@ public class UserController {
     public ResponseEntity<String> verifyPhoneNumber(@RequestParam String phoneNumber, @RequestParam String otp) {
         return ResponseEntity.ok(userService.verifyPhoneNumber(phoneNumber, otp));
     }
-
-
-
 
 }

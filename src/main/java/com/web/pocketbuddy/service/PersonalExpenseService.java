@@ -8,22 +8,22 @@ import java.util.List;
 
 public interface PersonalExpenseService {
 
+    public PersonalExpenseResponse getPersonalExpense(String id);
     public PersonalExpenseResponse addPersonalExpense(AddPersonalExpense expense);
     public PersonalExpenseResponse updatePersonalExpense(AddPersonalExpense expense);
-    public String deletePersonalExpense(String id);
-    public PersonalExpenseResponse getPersonalExpense(String id);
-    public void deletePersonalExpenseFromDb(String id);
+
+    public String markExpenseAsDeleted(String expenseId);
+    public String deletePersonalExpenseFromDb(String apiKey, String expenseId);
     public List<PersonalExpenseResponse> getPersonalExpensesInRange(FetchByDates fetchByDates);
 
-    public List<PersonalExpenseResponse> fetchAllPersonalExpense(String usernameOrEmail);
     public List<PersonalExpenseResponse> fetchAllPersonalExpenses();
     public List<PersonalExpenseResponse> fetchAllPersonalExpensesByUserId(String userId);
 
-    public double getAllTotalSum(String usernameOrEmail);
-    public double getMonthlyTotalSum(String usernameOrEmail);
-    public double getLastMonthTotalSum(String usernameOrEmail);
+    public double getAllTotalSum(String userId);
+    public double getMonthlyTotalSum(String userId);
+    public double getLastMonthTotalSum(String userId);
 
-    public boolean compareExpenseAmountWithMonthlyBudget(String usernameOrEmail);
+    public boolean compareExpenseAmountWithMonthlyBudget(String userId);
 
 
 }
