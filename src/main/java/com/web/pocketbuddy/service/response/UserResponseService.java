@@ -1,22 +1,23 @@
 package com.web.pocketbuddy.service.response;
 
-import com.web.pocketbuddy.constants.ConstantsUrls;
 import com.web.pocketbuddy.constants.ConstantsVariables;
+import com.web.pocketbuddy.constants.NotificationTemplate;
+import com.web.pocketbuddy.constants.UrlsConstants;
 import com.web.pocketbuddy.dto.UserDetailResponse;
 import com.web.pocketbuddy.entity.dao.UserMasterDoa;
-import com.web.pocketbuddy.entity.document.GroupDocument;
 import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.entity.helper.DeviceDetail;
-import com.web.pocketbuddy.entity.helper.OtpGenerateUtils;
+import com.web.pocketbuddy.entity.helper.GenerateUtils;
 import com.web.pocketbuddy.exception.UserApiException;
 import com.web.pocketbuddy.payload.RegisterUser;
 import com.web.pocketbuddy.payload.UserCredentials;
-import com.web.pocketbuddy.security.JwtUserDetailService;
 import com.web.pocketbuddy.service.UserService;
 import com.web.pocketbuddy.service.mapper.MapperUtils;
+import com.web.pocketbuddy.service.notification.NotificationService;
 import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -30,6 +31,7 @@ public class UserResponseService implements UserService {
 
     private final UserMasterDoa userMasterDoa;
     private final PasswordEncoder passwordEncoder;
+    private final NotificationService notificationService;
 
     @Override
     public UserDetailResponse registerUser(RegisterUser registerUser) {
@@ -52,9 +54,19 @@ public class UserResponseService implements UserService {
         }
         requestedUser.setPassword(passwordEncoder.encode(registerUser.getPassword()));
 
-        // TODO: Find the user join groups
+        String token = GenerateUtils.generateToken();
+        requestedUser.setEmailVerificationToken(token);
 
-        return MapperUtils.toUserDetailResponse(userMasterDoa.save(requestedUser));
+        UserDocument savedUser = userMasterDoa.save(requestedUser);
+
+        String emailVerificationUrl = buildEmailVerificationUrl(token);
+        notificationService.sendEmail(savedUser.getEmail(), "Verify Email Address", NotificationTemplate.EMAIL_VERIFICATION, NotificationTemplate.EMAIL_VALUE_REPLACE_KEY, emailVerificationUrl);
+
+        return MapperUtils.toUserDetailResponse(savedUser);
+    }
+
+    private String buildEmailVerificationUrl(String token) {
+        return UrlsConstants.HOST_HTTP_BASE_URL + UrlsConstants.AUTH_URL + "/verify/email?token=" + token;
     }
 
     @Override
@@ -90,7 +102,7 @@ public class UserResponseService implements UserService {
     public String generateOneTimePassword(String usernameOrEmail) {
         UserDocument savedUser = fetchUserByUsernameOrEmail(usernameOrEmail);
 
-        String otp = OtpGenerateUtils.generateOtp();
+        String otp = GenerateUtils.generateOtp();
         savedUser.setOneTimePassword(otp);
         userMasterDoa.save(savedUser);
 
@@ -126,7 +138,7 @@ public class UserResponseService implements UserService {
         UserDocument savedUser = userMasterDoa.findByMobileNumber(mobileNumber)
                 .orElseThrow(() -> new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST));
 
-        String otp = OtpGenerateUtils.generateOtp();
+        String otp = GenerateUtils.generateOtp();
         savedUser.setOneTimePassword(otp);
 
         // ToDo :: Send Otp to register mobile number
@@ -168,7 +180,7 @@ public class UserResponseService implements UserService {
     @Override
     public String updateMobileNumber(String mobileNumber, String usernameOrEmail) {
         UserDocument savedUser = fetchUserByUsernameOrEmail(usernameOrEmail);
-        savedUser.setOneTimePassword(OtpGenerateUtils.generateOtp());
+        savedUser.setOneTimePassword(GenerateUtils.generateOtp());
         userMasterDoa.save(savedUser);
         return ConstantsVariables.OTP_SEND_MESSAGE + maskedString(savedUser.getMobileNumber(), false);
     }
@@ -194,6 +206,17 @@ public class UserResponseService implements UserService {
     @Override
     public void deleteUserFromDb(String userID) {
         userMasterDoa.delete(userMasterDoa.findById(userID).orElseThrow(() -> new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST)));
+    }
+
+    @Override
+    public String verifyEmailWithToken(String token) {
+        UserDocument savedDocument = userMasterDoa.findByEmailVerificationToken(token).orElseThrow(() -> new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST));
+        if(savedDocument.isEmailVerified()) {
+            throw new UserApiException("Email already verified", HttpStatus.BAD_REQUEST);
+        }
+        savedDocument.setEmailVerified(true);
+        userMasterDoa.save(savedDocument);
+        return "Email verified";
     }
 
     private boolean isUsernameExist(String username) {

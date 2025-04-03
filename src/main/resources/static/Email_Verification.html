@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            background: #ffffff;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 25px;
+            font-size: 16px;
+            color: #ffffff;
+            background-color: #008080;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Email Verification Required</h2>
+    <p>Welcome to PockeyBuddy! To complete your registration and secure your account, please confirm your email address by clicking the button below.</p>
+    <a href="{{verification_link}}" class="button">Verify Your Email</a>
+    <p>If the button is not working, use the following URL to verify:</p>
+    <p><a href="{{verification_link}}">{{verification_link}}</a></p>
+    <p>If you did not create an account with us, please contact us at <a href="mailto:work.saranshtyagi@gmail.com">work.saranshtyagi@gmail.com</a> for assistance.</p>
+    <div class="footer">&copy; 2025 PockeyBuddy. All rights reserved.</div>
+</div>
+</body>
+</html>

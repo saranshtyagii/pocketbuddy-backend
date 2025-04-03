@@ -1,15 +1,13 @@
 package com.web.pocketbuddy.controller;
 
-import com.web.pocketbuddy.constants.ConstantsUrls;
+import com.web.pocketbuddy.constants.UrlsConstants;
 import com.web.pocketbuddy.constants.ConstantsVariables;
 import com.web.pocketbuddy.entity.dao.UserMasterDoa;
-import com.web.pocketbuddy.entity.document.Config;
 import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.exception.UserApiException;
 import com.web.pocketbuddy.service.mapper.MapperUtils;
 import com.web.pocketbuddy.service.response.ConfigService;
 import lombok.AllArgsConstructor;
-import org.apache.catalina.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
@@ -26,7 +24,7 @@ import java.util.UUID;
 
 @RestController()
 @AllArgsConstructor
-@RequestMapping(ConstantsUrls.BASE_URL_V1 + "/status")
+@RequestMapping(UrlsConstants.BASE_URL_V1 + "/status")
 public class ApiStatusController {
 
     private final UserMasterDoa userMasterDoa;
@@ -36,7 +34,7 @@ public class ApiStatusController {
         if(checkApiKey(apiKey)) {
             return ResponseEntity.badRequest().body("It's not that easy my friend :D");
         }
-        return new ResponseEntity<>("Pocket Buddy is live on - https://www.nexlogix.com" + ConstantsUrls.HOST_URL, HttpStatus.OK);
+        return new ResponseEntity<>("Pocket Buddy is live on - https://www.nexlogix.com" + UrlsConstants.HOST_URL, HttpStatus.OK);
     }
 
     @GetMapping("/db")

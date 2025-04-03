@@ -1,6 +1,6 @@
 package com.web.pocketbuddy.config;
 
-import com.web.pocketbuddy.constants.ConstantsUrls;
+import com.web.pocketbuddy.constants.UrlsConstants;
 import com.web.pocketbuddy.security.JwtRequestFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -36,10 +36,10 @@ public class WebSecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(ConstantsUrls.AUTH_URL.concat("/**")).permitAll()
-                        .requestMatchers(ConstantsUrls.BASE_URL_V1.concat("/status/**")).permitAll()
-                        .requestMatchers(ConstantsUrls.CRM_URL.concat("/**")).permitAll()
-                        .requestMatchers(ConstantsUrls.ADD_MOD_URL.concat("/**")).permitAll()
+                        .requestMatchers(UrlsConstants.AUTH_URL.concat("/**")).permitAll()
+                        .requestMatchers(UrlsConstants.BASE_URL_V1.concat("/status/**")).permitAll()
+                        .requestMatchers(UrlsConstants.CRM_URL.concat("/**")).permitAll()
+                        .requestMatchers(UrlsConstants.ADD_MOD_URL.concat("/**")).permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/swagger-ui.html").permitAll()

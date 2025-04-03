@@ -1,6 +1,6 @@
 package com.web.pocketbuddy.controller.crm;
 
-import com.web.pocketbuddy.constants.ConstantsUrls;
+import com.web.pocketbuddy.constants.UrlsConstants;
 import com.web.pocketbuddy.payload.CrmLoginCred;
 import com.web.pocketbuddy.service.response.ConfigService;
 import org.springframework.stereotype.Controller;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping(ConstantsUrls.CRM_URL)
+@RequestMapping(UrlsConstants.CRM_URL)
 public class CrmController {
 
     @GetMapping("/fetch")
