@@ -1,4 +1,4 @@
-package com.web.pocketbuddy.entity.helper;
+package com.web.pocketbuddy.utils;
 
 import org.apache.commons.lang3.StringUtils;
 

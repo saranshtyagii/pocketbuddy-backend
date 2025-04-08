@@ -1,11 +1,10 @@
-package com.web.pocketbuddy.service.response;
+package com.web.pocketbuddy.utils;
 
 import com.web.pocketbuddy.constants.ConstantsVariables;
 import com.web.pocketbuddy.dto.PersonalExpenseResponse;
 import com.web.pocketbuddy.dto.UserDetailResponse;
 import com.web.pocketbuddy.entity.dao.ConfigMasterDoa;
 import com.web.pocketbuddy.entity.document.Config;
-import com.web.pocketbuddy.entity.helper.RedisUtils;
 import com.web.pocketbuddy.payload.AddPersonalExpense;
 import com.web.pocketbuddy.payload.RegisterUser;
 import com.web.pocketbuddy.service.GroupExpenseService;
