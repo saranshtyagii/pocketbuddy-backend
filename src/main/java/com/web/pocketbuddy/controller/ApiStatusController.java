@@ -6,7 +6,7 @@ import com.web.pocketbuddy.entity.dao.UserMasterDoa;
 import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.exception.UserApiException;
 import com.web.pocketbuddy.service.mapper.MapperUtils;
-import com.web.pocketbuddy.service.response.ConfigService;
+import com.web.pocketbuddy.utils.ConfigService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

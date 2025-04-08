@@ -1,8 +1,7 @@
 package com.web.pocketbuddy;
 
-import com.web.pocketbuddy.entity.helper.GenerateUtils;
-import com.web.pocketbuddy.entity.helper.RedisUtils;
-import com.web.pocketbuddy.service.response.RedisServices;
+import com.web.pocketbuddy.utils.GenerateUtils;
+import com.web.pocketbuddy.utils.RedisUtils;
 import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.SpringApplication;

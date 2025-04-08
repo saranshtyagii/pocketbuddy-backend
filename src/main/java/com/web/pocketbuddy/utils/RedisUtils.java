@@ -1,6 +1,5 @@
-package com.web.pocketbuddy.entity.helper;
+package com.web.pocketbuddy.utils;
 
-import com.web.pocketbuddy.service.response.RedisServices;
 import io.micrometer.common.util.StringUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;

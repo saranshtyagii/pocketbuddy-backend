@@ -2,7 +2,7 @@ package com.web.pocketbuddy.controller.crm;
 
 import com.web.pocketbuddy.constants.UrlsConstants;
 import com.web.pocketbuddy.payload.CrmLoginCred;
-import com.web.pocketbuddy.service.response.ConfigService;
+import com.web.pocketbuddy.utils.ConfigService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;

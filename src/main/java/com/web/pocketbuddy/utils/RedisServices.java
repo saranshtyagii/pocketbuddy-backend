@@ -1,4 +1,4 @@
-package com.web.pocketbuddy.service.response;
+package com.web.pocketbuddy.utils;
 
 import lombok.AllArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
