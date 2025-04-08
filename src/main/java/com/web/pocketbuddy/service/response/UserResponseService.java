@@ -102,7 +102,7 @@ public class UserResponseService implements UserService {
     public String generateOneTimePassword(String usernameOrEmail) {
         UserDocument savedUser = fetchUserByUsernameOrEmail(usernameOrEmail);
 
-        String otp = GenerateUtils.generateOtp();
+        String otp = GenerateUtils.generateOtp(usernameOrEmail);
         savedUser.setOneTimePassword(otp);
         userMasterDoa.save(savedUser);
 
@@ -138,7 +138,7 @@ public class UserResponseService implements UserService {
         UserDocument savedUser = userMasterDoa.findByMobileNumber(mobileNumber)
                 .orElseThrow(() -> new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST));
 
-        String otp = GenerateUtils.generateOtp();
+        String otp = GenerateUtils.generateOtp(mobileNumber);
         savedUser.setOneTimePassword(otp);
 
         // ToDo :: Send Otp to register mobile number
@@ -180,7 +180,7 @@ public class UserResponseService implements UserService {
     @Override
     public String updateMobileNumber(String mobileNumber, String usernameOrEmail) {
         UserDocument savedUser = fetchUserByUsernameOrEmail(usernameOrEmail);
-        savedUser.setOneTimePassword(GenerateUtils.generateOtp());
+        savedUser.setOneTimePassword(GenerateUtils.generateOtp(usernameOrEmail));
         userMasterDoa.save(savedUser);
         return ConstantsVariables.OTP_SEND_MESSAGE + maskedString(savedUser.getMobileNumber(), false);
     }

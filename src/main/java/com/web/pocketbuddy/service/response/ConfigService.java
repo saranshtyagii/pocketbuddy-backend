@@ -5,6 +5,7 @@ import com.web.pocketbuddy.dto.PersonalExpenseResponse;
 import com.web.pocketbuddy.dto.UserDetailResponse;
 import com.web.pocketbuddy.entity.dao.ConfigMasterDoa;
 import com.web.pocketbuddy.entity.document.Config;
+import com.web.pocketbuddy.entity.helper.RedisUtils;
 import com.web.pocketbuddy.payload.AddPersonalExpense;
 import com.web.pocketbuddy.payload.RegisterUser;
 import com.web.pocketbuddy.service.GroupExpenseService;
@@ -26,14 +27,16 @@ public class ConfigService {
 	private final UserService userService;
 	private final PersonalExpenseService personalExpenseService;
 	private final GroupExpenseService groupExpenseService;
+	private final RedisUtils redisUtils;
 
 	@Autowired
-	public ConfigService(ConfigMasterDoa configMasterDoa, UserService userService, PersonalExpenseService personalExpenseService, GroupExpenseService groupExpenseService) {
+	public ConfigService(ConfigMasterDoa configMasterDoa, UserService userService, PersonalExpenseService personalExpenseService, GroupExpenseService groupExpenseService, RedisUtils redisUtils) {
 		this.configMasterDoa = configMasterDoa;
 		this.userService = userService;
 		this.personalExpenseService = personalExpenseService;
 		this.groupExpenseService = groupExpenseService;
-	}
+        this.redisUtils = redisUtils;
+    }
 
 	@EventListener(ContextRefreshedEvent.class)
 	private void loadConfig() {
@@ -82,7 +85,15 @@ public class ConfigService {
 					personalExpenseService.deletePersonalExpenseFromDb(ConstantsVariables.API_KEY, savedPersonalExpenseResponse.getExpenseId());
 					userService.deleteUserFromDb(savedUser.getUserId());
 
-					System.err.println("Validation successfully!");
+					System.err.println("Mongo Validation successfully!");
+
+					System.err.println("\nValidating Pocket Buddy Redis connections...");
+					String key = "ValidatingPocketBuddyRedisConnections";
+					String value = "Pocket Buddy Redis connections";
+					redisUtils.set(key, value);
+					redisUtils.del(key);
+
+					System.err.println("Redis Validation successfully!\n");
 
 				} catch (Exception e) {
 					System.err.println("Validation failed: " + e.getMessage());
