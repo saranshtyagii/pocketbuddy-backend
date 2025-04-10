@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Document
 @Builder
@@ -27,7 +28,7 @@ public class GroupExpenseDocument {
     @NotNull
     private double expenseAmount;
 
-    private List<String> includedMembers;
+    private Map<String, Map<String, Double>> includedMembers;
     @NotNull
     private String registerByUserId;
     @CreatedDate

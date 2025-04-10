@@ -21,6 +21,6 @@ public class GroupDetailsResponse {
     private String createdByUserId;
     private Date createdAt;
 
-    private Map<String, String> joinedMembers;
+    private Map<String, Map<String, Double>> joinedMembers;
 
 }
