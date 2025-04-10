@@ -12,7 +12,7 @@ import java.util.List;
 @Getter
 @Builder
 @AllArgsConstructor
-public class GroupExpensesDto {
+public class GroupDetailsDto {
 
     private String expenseId;
     private String groupId;

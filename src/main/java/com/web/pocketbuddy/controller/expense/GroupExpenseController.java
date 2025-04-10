@@ -2,9 +2,9 @@ package com.web.pocketbuddy.controller.expense;
 
 import com.web.pocketbuddy.constants.UrlsConstants;
 import com.web.pocketbuddy.dto.GroupDetailsResponse;
-import com.web.pocketbuddy.dto.GroupExpensesDto;
+import com.web.pocketbuddy.dto.GroupDetailsDto;
 import com.web.pocketbuddy.payload.GroupRegisterDetails;
-import com.web.pocketbuddy.service.GroupExpenseService;
+import com.web.pocketbuddy.service.GroupDetailsService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 public class GroupExpenseController {
 
-    private final GroupExpenseService groupExpenseService;
+    private final GroupDetailsService groupExpenseService;
 
     // Group Related Service
 
@@ -49,12 +49,12 @@ public class GroupExpenseController {
     // Group Expense Related Service
 
     @PostMapping("/add-expense")
-    public ResponseEntity<List<GroupExpensesDto>> addExpense(@RequestBody GroupExpensesDto groupExpensesDto) {
-        return new ResponseEntity<>(groupExpenseService.addExpense(groupExpensesDto), HttpStatus.CREATED);
+    public ResponseEntity<List<GroupDetailsDto>> addExpense(@RequestBody GroupDetailsDto groupDetailsDto) {
+        return new ResponseEntity<>(groupExpenseService.addExpense(groupDetailsDto), HttpStatus.CREATED);
     }
 
     @GetMapping("/find-expenses")
-    public ResponseEntity<List<GroupExpensesDto>> getAllGroupExpenses(@RequestParam String groupId) {
+    public ResponseEntity<List<GroupDetailsDto>> getAllGroupExpenses(@RequestParam String groupId) {
         return ResponseEntity.ok(groupExpenseService.findGroupExpensesByGroupId(groupId));
     }
 

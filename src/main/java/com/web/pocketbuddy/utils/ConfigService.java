@@ -7,7 +7,7 @@ import com.web.pocketbuddy.entity.dao.ConfigMasterDoa;
 import com.web.pocketbuddy.entity.document.Config;
 import com.web.pocketbuddy.payload.AddPersonalExpense;
 import com.web.pocketbuddy.payload.RegisterUser;
-import com.web.pocketbuddy.service.GroupExpenseService;
+import com.web.pocketbuddy.service.GroupDetailsService;
 import com.web.pocketbuddy.service.PersonalExpenseService;
 import com.web.pocketbuddy.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +25,11 @@ public class ConfigService {
 	private static Config config;
 	private final UserService userService;
 	private final PersonalExpenseService personalExpenseService;
-	private final GroupExpenseService groupExpenseService;
+	private final GroupDetailsService groupExpenseService;
 	private final RedisUtils redisUtils;
 
 	@Autowired
-	public ConfigService(ConfigMasterDoa configMasterDoa, UserService userService, PersonalExpenseService personalExpenseService, GroupExpenseService groupExpenseService, RedisUtils redisUtils) {
+	public ConfigService(ConfigMasterDoa configMasterDoa, UserService userService, PersonalExpenseService personalExpenseService, GroupDetailsService groupExpenseService, RedisUtils redisUtils) {
 		this.configMasterDoa = configMasterDoa;
 		this.userService = userService;
 		this.personalExpenseService = personalExpenseService;
