@@ -43,24 +43,7 @@ public class GroupExpenseController {
 
     @GetMapping("/remove-groups")
     public ResponseEntity<String> removeGroup(@RequestParam String apiKey) {
-        return ResponseEntity.ok(groupExpenseService.deleteGroupFromDb(apiKey));
-    }
-
-    // Group Expense Related Service
-
-    @PostMapping("/add-expense")
-    public ResponseEntity<List<GroupDetailsDto>> addExpense(@RequestBody GroupDetailsDto groupDetailsDto) {
-        return new ResponseEntity<>(groupExpenseService.addExpense(groupDetailsDto), HttpStatus.CREATED);
-    }
-
-    @GetMapping("/find-expenses")
-    public ResponseEntity<List<GroupDetailsDto>> getAllGroupExpenses(@RequestParam String groupId) {
-        return ResponseEntity.ok(groupExpenseService.findGroupExpensesByGroupId(groupId));
-    }
-
-    @DeleteMapping("/remove-expense")
-    public ResponseEntity<String> removeExpense(@RequestParam String expenseId, @RequestParam String userId) {
-        return ResponseEntity.ok(groupExpenseService.markExpenseAsDeleted(expenseId, userId));
+        return ResponseEntity.ok(groupExpenseService.deleteGroupFromDb(apiKey, null));
     }
 
 }

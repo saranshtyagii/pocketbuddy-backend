@@ -22,37 +22,10 @@ public class GroupExpenseResponseService implements GroupExpenseService {
     private final GroupDetailsService groupDetailsService;
     private final GroupExpenseMasterDoa groupExpenseMasterDoa;
 
+
     @Override
     public GroupExpenseDto addExpense(GroupExpensePayload expensePayload) {
-        GroupExpenseDocument addRequest = MapperUtils.convertToGroupExpenseDocument(expensePayload);
-
-        double spiltBetween = addRequest.getIncludedMembers().size();
-        double expensePerPersonAmount = expensePayload.getAmount() / spiltBetween;
-
-        GroupDocument savedGroup = groupDetailsService.findByGroupIdAsDoc(expensePayload.getGroupId());
-
-        Map<String, Map<String, Double>> includedMembers = savedGroup.getMembers();
-        savedGroup.getMembers().forEach((userId, userInfoMap) -> {
-            if (addRequest.getIncludedMembers().containsKey(userId)) {
-                String userName = userInfoMap.keySet().iterator().next();
-                double updatedAmount = expensePerPersonAmount;
-                Map<String, Double> updatedInfo = new HashMap<>();
-                updatedInfo.put(userName, updatedAmount);
-
-                includedMembers.put(userId, updatedInfo);
-            } else {
-                String userName = userInfoMap.keySet().iterator().next();
-                double updatedAmount = 0.00;
-                Map<String, Double> updatedInfo = new HashMap<>();
-                updatedInfo.put(userName, updatedAmount);
-
-                includedMembers.put(userId, updatedInfo);
-            }
-        });
-
-        //:ToDo change the original Group Map as per new Data everytime
-
-       return  MapperUtils.convertToGroupExpenseDto(groupExpenseMasterDoa.save(addRequest));
+        return null;
     }
 
     @Override
@@ -79,5 +52,4 @@ public class GroupExpenseResponseService implements GroupExpenseService {
     public List<GroupExpenseDto> getExpensesByGroupId(String groupId) {
         return List.of();
     }
-
 }
