@@ -34,7 +34,7 @@ public class GroupDocument {
     @NotNull
     private String createdByUser;
 
-    private Map<String, Map<String, Double>> members; // userID, UserName, ExpenseAmount
+    private Map<String, Double> members; // userID, UserName, ExpenseAmount
 
     private SettlementCycle settlementCycle;
 

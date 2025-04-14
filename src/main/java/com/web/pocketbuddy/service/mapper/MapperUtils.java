@@ -111,7 +111,6 @@ public class MapperUtils {
                 .groupDescription(savedGroupDocument.getDescription())
                 .createdByUserId(savedGroupDocument.getCreatedByUser())
                 .createdAt(savedGroupDocument.getCreateDate())
-                .joinedMembers(savedGroupDocument.getMembers())
                 .build();
 
     }

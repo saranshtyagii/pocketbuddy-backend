@@ -19,13 +19,6 @@ public interface GroupDetailsService {
 
     public GroupDetailsResponse findGroupById(String groupId);
 
-    public String deleteGroupFromDb(String apiKey);
+    public String deleteGroupFromDb(String apiKey, String groupId);
 
-    public List<GroupDetailsDto> findGroupExpensesByGroupId(String groupId);
-
-    String markExpenseAsDeleted(String expenseId, String userId);
-
-    List<GroupDetailsDto> addExpense(GroupDetailsDto groupDetailsDto);
-
-    public GroupDocument findByGroupIdAsDoc(String groupId);
 }
