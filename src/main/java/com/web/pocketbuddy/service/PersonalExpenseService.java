@@ -25,5 +25,4 @@ public interface PersonalExpenseService {
 
     public boolean compareExpenseAmountWithMonthlyBudget(String userId);
 
-
 }

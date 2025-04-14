@@ -1,11 +1,14 @@
 package com.web.pocketbuddy.controller.user;
 
 import com.web.pocketbuddy.constants.UrlsConstants;
+import com.web.pocketbuddy.dto.GroupDetailsResponse;
 import com.web.pocketbuddy.dto.UserDetailResponse;
 import com.web.pocketbuddy.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(UrlsConstants.USER_URL)
@@ -36,7 +39,12 @@ public class UserController {
 
     @PatchMapping("/verify/phone")
     public ResponseEntity<String> verifyPhoneNumber(@RequestParam String phoneNumber, @RequestParam String otp) {
-        return ResponseEntity.ok(userService.verifyPhoneNumber(phoneNumber, otp));
+        return ResponseEntity.ok(userService.verifyMobileNumber(phoneNumber, otp));
+    }
+
+    @GetMapping("/find-joined-groups")
+    public ResponseEntity<List<GroupDetailsResponse>> userJoinedGroups(@RequestParam String usernameOrEmail) {
+        return ResponseEntity.ok(userService.findUserJoinedGroups(usernameOrEmail));
     }
 
 }
