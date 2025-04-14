@@ -9,5 +9,5 @@ import java.util.Optional;
 public interface PersonalExpenseMasterDoa extends MongoRepository<PersonalExpenseDocument, String> {
     Optional<List<PersonalExpenseDocument>> findByUserId(String userId);
 
-    List<PersonalExpenseDocument> findAllByUserId(String userId);
+    Optional<List<PersonalExpenseDocument>> findAllByUserId(String userId);
 }

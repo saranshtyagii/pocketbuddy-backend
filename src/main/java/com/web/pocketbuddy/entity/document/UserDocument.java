@@ -7,6 +7,7 @@ import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
@@ -20,6 +21,7 @@ import java.util.Map;
 @Getter
 @Setter
 @ToString
+@EnableMongoAuditing
 public class UserDocument {
 
     @Id
@@ -43,6 +45,7 @@ public class UserDocument {
 
     private String oneTimePassword;
     private String emailVerificationToken;
+    private String changePasswordToken;
 
     private boolean subscribeEmailNotification = true;
 

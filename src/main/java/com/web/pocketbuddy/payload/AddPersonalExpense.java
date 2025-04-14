@@ -13,8 +13,8 @@ import java.util.Date;
 @Builder
 public class AddPersonalExpense {
 
-    private String userID;
-    private String expenseID;
+    private String userId;
+    private String expenseId;
     private String description;
     private double amount;
     private Date createdDate;

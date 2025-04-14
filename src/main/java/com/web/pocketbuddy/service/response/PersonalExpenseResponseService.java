@@ -42,10 +42,10 @@ public class PersonalExpenseResponseService implements PersonalExpenseService {
 
     @Override
     public PersonalExpenseResponse updatePersonalExpense(AddPersonalExpense expense) {
-        PersonalExpenseDocument savedPersonalExpenseDocument = fetchPersonalExpenseDocumentById(expense.getExpenseID());
+        PersonalExpenseDocument savedPersonalExpenseDocument = fetchPersonalExpenseDocumentById(expense.getExpenseId());
 
         savedPersonalExpenseDocument.setExpenseDescription(expense.getDescription());
-        savedPersonalExpenseDocument.setExpenseId(expense.getExpenseID());
+        savedPersonalExpenseDocument.setExpenseId(expense.getExpenseId());
         savedPersonalExpenseDocument.setAmount(expense.getAmount());
         savedPersonalExpenseDocument.setExpenseDate(expense.getCreatedDate());
 
@@ -114,7 +114,8 @@ public class PersonalExpenseResponseService implements PersonalExpenseService {
 
     @Override
     public List<PersonalExpenseResponse> fetchAllPersonalExpensesByUserId(String userId) {
-        List<PersonalExpenseDocument> savedPersonalExpense = personalExpenseMasterDoa.findAllByUserId(userId);
+        List<PersonalExpenseDocument> savedPersonalExpense = personalExpenseMasterDoa.findAllByUserId(userId)
+                .orElse(Collections.emptyList());
 
         if(ObjectUtils.isEmpty(savedPersonalExpense)) {
             return Collections.emptyList();

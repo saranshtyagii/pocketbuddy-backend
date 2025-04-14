@@ -3,6 +3,7 @@ package com.web.pocketbuddy.service.response;
 import com.web.pocketbuddy.constants.ConstantsVariables;
 import com.web.pocketbuddy.constants.NotificationTemplate;
 import com.web.pocketbuddy.constants.UrlsConstants;
+import com.web.pocketbuddy.dto.GroupDetailsResponse;
 import com.web.pocketbuddy.dto.UserDetailResponse;
 import com.web.pocketbuddy.entity.dao.UserMasterDoa;
 import com.web.pocketbuddy.entity.document.UserDocument;
@@ -14,6 +15,7 @@ import com.web.pocketbuddy.payload.UserCredentials;
 import com.web.pocketbuddy.service.UserService;
 import com.web.pocketbuddy.service.mapper.MapperUtils;
 import com.web.pocketbuddy.service.notification.NotificationService;
+import com.web.pocketbuddy.utils.RedisServices;
 import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -31,6 +33,7 @@ public class UserResponseService implements UserService {
     private final UserMasterDoa userMasterDoa;
     private final PasswordEncoder passwordEncoder;
     private final NotificationService notificationService;
+    private final RedisServices redisServices;
 
     @Override
     public UserDetailResponse registerUser(RegisterUser registerUser) {
@@ -69,8 +72,8 @@ public class UserResponseService implements UserService {
     }
 
     @Override
-    public UserDetailResponse findUserByUsername(String username) {
-        return null;
+    public UserDetailResponse findUserByUsername(String usernameOrEmail) {
+        return MapperUtils.UserDetailResponse(fetchUserByUsernameOrEmail(usernameOrEmail));
     }
 
     @Override
@@ -90,47 +93,18 @@ public class UserResponseService implements UserService {
     }
 
     @Override
-    public UserDocument savedUpdatedUser(UserDocument userDocument) {
+    public void savedUpdatedUser(UserDocument userDocument) {
         if(ObjectUtils.isEmpty(userDocument)) {
             throw new UserApiException("User Data can't be empty!", HttpStatus.BAD_REQUEST);
         }
-        return userMasterDoa.save(userDocument);
+        userMasterDoa.save(userDocument);
     }
 
     @Override
-    public String generateOneTimePassword(String usernameOrEmail) {
-        UserDocument savedUser = fetchUserByUsernameOrEmail(usernameOrEmail);
-
-        String otp = GenerateUtils.generateOtp(usernameOrEmail);
-        savedUser.setOneTimePassword(otp);
-        userMasterDoa.save(savedUser);
-
-        // ToDo: Send email
-
-        return ConstantsVariables.OTP_SEND_MESSAGE + maskedString(savedUser.getEmail(), true);
-    }
-
-    @Override
-    public String verifyMobileNumber(String mobile) {
+    public String generateOneTimePasswordForEmail(String usernameOrEmail) {
         return "";
     }
 
-    @Override
-    public String verifyEmailOtp(String usernameOrEmail, String otp) {
-        UserDocument savedUser = fetchUserByUsernameOrEmail(usernameOrEmail);
-        if(otp.equals(savedUser.getOneTimePassword())) {
-            return "Opt verify successfully";
-        }
-        throw new UserApiException(ConstantsVariables.INVALID_OTP, HttpStatus.BAD_REQUEST);
-    }
-
-    @Override
-    public UserDetailResponse updatePassword(UserCredentials userCredentials) {
-        UserDocument savedUser = fetchUserByUsernameOrEmail(userCredentials.getUsernameOrEmail());
-        savedUser.setPassword(passwordEncoder.encode(userCredentials.getPassword()));
-
-        return MapperUtils.toUserDetailResponse(userMasterDoa.save(savedUser));
-    }
 
     @Override
     public String generateOneTimePasswordForMobile(String mobileNumber) {
@@ -146,35 +120,100 @@ public class UserResponseService implements UserService {
     }
 
     @Override
-    public void saveUserTokenAndData(UserCredentials userCredentials, String token) {
-        UserDocument savedUser = fetchUserByUsernameOrEmail(userCredentials.getUsernameOrEmail());
-
-        savedUser.setLastLoginDate(new Date());
-        savedUser.setLastLoginIp(userCredentials.getIpAddress());
-        savedUser.setCurrentModelName(userCredentials.getModelName());
-        savedUser.setCurrentModelVersion(userCredentials.getModelVersion());
-        savedUser.setCurrentOsVersion(userCredentials.getOsVersion());
-        savedUser.setCurrentAppVersion(userCredentials.getAppVersion());
-
-        Map<String, DeviceDetail> listOfDevices = savedUser.getListOfLoginDevices();
-        if(listOfDevices == null) {
-            listOfDevices = new HashMap<>();
-        }
-        DeviceDetail deviceDetail = DeviceDetail.builder()
-                .loginDate(new Date())
-                .loginIp(userCredentials.getIpAddress())
-                .loginDeviceId(userCredentials.getDeviceId())
-                .modelName(userCredentials.getModelName())
-                .modelVersion(userCredentials.getModelVersion())
-                .osVersion(userCredentials.getOsVersion())
-                .authToken(token)
-                .build();
-        listOfDevices.put(deviceDetail.getLoginDeviceId(), deviceDetail);
-        savedUser.setListOfLoginDevices(listOfDevices);
-
-
-        userMasterDoa.save(savedUser);
+    public String verifyMobileNumber(String phoneNumber, String otp) {
+        return "";
     }
+
+    @Override
+    public void saveUserTokenAndData(UserCredentials userCredentials, String token) {
+        try {
+            UserDocument savedUser = fetchUserByUsernameOrEmail(userCredentials.getUsernameOrEmail());
+
+            // Update basic user login data
+            savedUser.setLastLoginDate(new Date());
+            savedUser.setLastLoginIp(userCredentials.getIpAddress());
+            savedUser.setCurrentModelName(userCredentials.getModelName());
+            savedUser.setCurrentModelVersion(userCredentials.getModelVersion());
+            savedUser.setCurrentOsVersion(userCredentials.getOsVersion());
+            savedUser.setCurrentAppVersion(userCredentials.getAppVersion());
+
+            // Update device details
+            Map<String, DeviceDetail> listOfDevices = savedUser.getListOfLoginDevices();
+            if (listOfDevices == null) {
+                listOfDevices = new HashMap<>();
+            }
+
+            DeviceDetail deviceDetail = DeviceDetail.builder()
+                    .loginDate(new Date())
+                    .loginIp(userCredentials.getIpAddress())
+                    .loginDeviceId(userCredentials.getDeviceId())
+                    .modelName(userCredentials.getModelName())
+                    .modelVersion(userCredentials.getModelVersion())
+                    .osVersion(userCredentials.getOsVersion())
+                    .authToken(token)
+                    .build();
+
+            String sanitizedDeviceId = StringUtils.replace(deviceDetail.getLoginDeviceId(), ".", "_");
+            listOfDevices.put(sanitizedDeviceId, deviceDetail);
+
+            savedUser.setListOfLoginDevices(listOfDevices);
+
+            userMasterDoa.save(savedUser);
+
+        } catch (Exception e) {
+            // You can optionally log the stack trace here for debugging
+             e.printStackTrace();
+            throw new UserApiException("Something went wrong while saving user token and data", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Override
+    public String generateChangePasswordToken(String usernameOrEmail) {
+        UserDocument savedUser = userMasterDoa.findByEmailOrUsername(usernameOrEmail, usernameOrEmail)
+                .orElseThrow(() -> new UserApiException(ConstantsVariables.USER_NOT_FOUND, HttpStatus.NOT_FOUND));
+        if(!savedUser.isEmailVerified()) throw new UserApiException("Email is not verified", HttpStatus.BAD_REQUEST);
+
+        Object savedToken = null;
+        try {
+            savedToken = redisServices.get("change-password-token:" + savedUser.getUserId());
+            if(ObjectUtils.isEmpty(savedToken)) {
+                savedToken = GenerateUtils.generateToken();
+                savedUser.setChangePasswordToken(savedToken.toString());
+                redisServices.set(usernameOrEmail, savedToken,5L * 60);
+                savedUpdatedUser(savedUser);
+            }
+        } catch (Exception e) {
+            savedToken = GenerateUtils.generateToken();
+            savedUser.setChangePasswordToken(savedToken.toString());
+            redisServices.set(usernameOrEmail, savedToken);
+            savedUpdatedUser(savedUser);
+        }
+
+        String restLink = UrlsConstants.HOST_HTTP_BASE_URL + "/template/change-password?token=" + savedUser.getChangePasswordToken();
+        notificationService.sendEmail(savedUser.getEmail(), "Pocket Buddy Update Password", NotificationTemplate.CHANGE_PASSWORD, "{{reset_link}}", restLink);
+
+        return "Email has been send for change password on: " + MapperUtils.maskEmail(savedUser.getEmail());
+    }
+
+    @Override
+    public String updatePassword(String token, String newPassword) {
+        UserDocument savedUserDoc = userMasterDoa.findByChangePasswordToken(token)
+                .orElseThrow(() ->
+                        new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST));
+        savedUserDoc.setPassword(passwordEncoder.encode(newPassword));
+        savedUserDoc.setChangePasswordToken(null);
+        savedUpdatedUser(savedUserDoc);
+
+        // clear redis key
+        try {
+            redisServices.delete("change-password-token:" + savedUserDoc.getUserId());
+        } catch (Exception e) {
+            // ignore
+        }
+
+        return "Password changed successfully";
+    }
+
 
     @Override
     public String updateMobileNumber(String mobileNumber, String usernameOrEmail) {
@@ -184,27 +223,21 @@ public class UserResponseService implements UserService {
         return ConstantsVariables.OTP_SEND_MESSAGE + maskedString(savedUser.getMobileNumber(), false);
     }
 
-    @Override
-    public String verifyPhoneNumber(String mobileNumber, String otp) {
-        UserDocument savedUser = userMasterDoa.findByMobileNumber(mobileNumber)
-                .orElseThrow(() -> new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST));
-
-        if(savedUser.isPhoneVerified()) {
-            return "Mobile is already verified";
-        }
-
-        if(otp.equals(savedUser.getOneTimePassword())) {
-            savedUser.setPhoneVerified(true);
-            return "Opt verify successfully";
-        }
-        else {
-            throw new UserApiException(ConstantsVariables.INVALID_OTP, HttpStatus.BAD_REQUEST);
-        }
-    }
 
     @Override
     public void deleteUserFromDb(String userID) {
         userMasterDoa.delete(userMasterDoa.findById(userID).orElseThrow(() -> new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST)));
+    }
+
+    @Override
+    public List<GroupDetailsResponse> findUserJoinedGroups(String usernameOrEmail) {
+        UserDocument savedUser = fetchUserByUsernameOrEmail(usernameOrEmail);
+        if(savedUser.getUserJoinGroup().isEmpty()) return Collections.emptyList();
+
+        return savedUser.getUserJoinGroup()
+                .stream()
+                .filter(group -> !group.isDeleted())
+                .map(MapperUtils::convertGroupDetailResponse).toList();
     }
 
     @Override

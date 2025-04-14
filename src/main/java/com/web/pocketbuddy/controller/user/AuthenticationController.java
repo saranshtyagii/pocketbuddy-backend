@@ -5,6 +5,7 @@ import com.web.pocketbuddy.dto.TokenResponse;
 import com.web.pocketbuddy.dto.UserDetailResponse;
 import com.web.pocketbuddy.exception.UserApiException;
 import com.web.pocketbuddy.payload.RegisterUser;
+import com.web.pocketbuddy.payload.UpdatePasswordPayload;
 import com.web.pocketbuddy.payload.UserCredentials;
 import com.web.pocketbuddy.security.JwtTokenUtils;
 import com.web.pocketbuddy.security.JwtUserDetailService;
@@ -53,19 +54,20 @@ public class AuthenticationController {
         return ResponseEntity.ok(MapperUtils.convertObjectToString(response));
     }
 
-    @PatchMapping("/forgot/password")
-    public ResponseEntity<String> generateOneTimePassword(@RequestParam String usernameOrEmail) {
-        return ResponseEntity.ok(userService.generateOneTimePassword(usernameOrEmail));
-    }
-
     @PatchMapping("/verify/email/otp")
     public ResponseEntity<String> verifyOtp(@RequestParam String usernameOrEmail, @RequestParam String otp) {
-        return ResponseEntity.ok(userService.verifyEmailOtp(usernameOrEmail, otp));
+//        return ResponseEntity.ok(userService.verifyMobileNumber(usernameOrEmail, otp));
+        return null;
     }
 
-    @PostMapping("/update/password")
-    public ResponseEntity<String> updatePassword(@RequestBody UserCredentials userCredentials) {
-        return ResponseEntity.ok(MapperUtils.convertObjectToString(userService.updatePassword(userCredentials)));
+    @GetMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestParam String usernameOrEmail) {
+        return ResponseEntity.ok(userService.generateChangePasswordToken(usernameOrEmail));
+    }
+
+    @PostMapping("/update-password")
+    public ResponseEntity<String> updatePassword(@RequestBody UpdatePasswordPayload passwordPayload) {
+        return ResponseEntity.ok(userService.updatePassword(passwordPayload.getToken(), passwordPayload.getNewPassword()));
     }
 
     @PatchMapping("/generate/otp")
@@ -82,6 +84,5 @@ public class AuthenticationController {
     public ResponseEntity<String> verifyEmail(@RequestParam String token) {
         return ResponseEntity.ok(userService.verifyEmailWithToken(token));
     }
-
 
 }

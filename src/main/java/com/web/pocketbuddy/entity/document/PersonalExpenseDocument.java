@@ -5,6 +5,7 @@ import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
@@ -15,6 +16,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Getter
 @Setter
+@EnableMongoAuditing
 public class PersonalExpenseDocument {
 
     @Id
@@ -25,6 +27,7 @@ public class PersonalExpenseDocument {
     @NotNull
     private String expenseDescription;
 
+    @CreatedDate
     private Date expenseDate;
 
     @LastModifiedDate

@@ -10,6 +10,7 @@ import com.web.pocketbuddy.payload.AddPersonalExpense;
 import com.web.pocketbuddy.payload.GroupExpensePayload;
 import com.web.pocketbuddy.payload.GroupRegisterDetails;
 import com.web.pocketbuddy.payload.RegisterUser;
+import jakarta.validation.constraints.Email;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.ObjectUtils;
 
@@ -60,7 +61,7 @@ public class MapperUtils {
 
     public static PersonalExpenseDocument convertToPersonalExpenseDocument(AddPersonalExpense expense) {
         return PersonalExpenseDocument.builder()
-                .userId(expense.getUserID())
+                .userId(expense.getUserId())
                 .expenseDescription(expense.getDescription())
                 .amount(expense.getAmount())
                 .isUpdated(false)
@@ -165,4 +166,36 @@ public class MapperUtils {
                 .build();
     }
 
+    public static String maskEmail(@Email String email) {
+        if (email == null || !email.contains("@")) {
+            return email; // or throw an exception if you prefer
+        }
+
+        String[] parts = email.split("@");
+        String username = parts[0];
+        String domain = parts[1];
+
+        if (username.length() <= 2) {
+            // Mask entire username if it's too short
+            username = "*".repeat(username.length());
+        } else {
+            // Keep first and last character, mask the rest
+            int maskLength = username.length() - 2;
+            String maskedPart = "*".repeat(maskLength);
+            username = username.charAt(0) + maskedPart + username.charAt(username.length() - 1);
+        }
+
+        return username + "@" + domain;
+    }
+
+    public static UserDetailResponse UserDetailResponse(UserDocument userDocument) {
+        return UserDetailResponse.builder()
+                .userId(userDocument.getUserId())
+                .userFirstName(userDocument.getUserFirstName())
+                .userLastName(userDocument.getUserLastName())
+                .email(userDocument.getEmail())
+                .username(userDocument.getUsername())
+                .mobileNumber(userDocument.getMobileNumber())
+                .build();
+    }
 }

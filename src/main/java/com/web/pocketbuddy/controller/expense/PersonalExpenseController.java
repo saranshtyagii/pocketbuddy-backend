@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping(UrlsConstants.PERSONAL_URL)
 @AllArgsConstructor
@@ -18,7 +20,7 @@ public class PersonalExpenseController {
 
     private final PersonalExpenseService personalExpenseService;
 
-    @GetMapping("/register")
+    @PostMapping("/register")
     public ResponseEntity<PersonalExpenseResponse> registerExpense(@RequestBody AddPersonalExpense expense) {
         return ResponseEntity.ok(personalExpenseService.addPersonalExpense(expense));
     }
@@ -29,8 +31,8 @@ public class PersonalExpenseController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<Void> deleteExpense(@PathVariable String expenseId) {
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    public ResponseEntity<String> deleteExpense(@RequestParam String expenseId) {
+        return ResponseEntity.ok(personalExpenseService.markExpenseAsDeleted(expenseId));
     }
 
     @GetMapping("/findbydate")
@@ -38,6 +40,9 @@ public class PersonalExpenseController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-
+    @GetMapping("/fetchAll")
+    public ResponseEntity<List<PersonalExpenseResponse>> fetchAll(@RequestParam String userId) {
+        return ResponseEntity.ok(personalExpenseService.fetchAllPersonalExpensesByUserId(userId));
+    }
 
 }

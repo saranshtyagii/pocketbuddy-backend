@@ -13,4 +13,6 @@ public interface UserMasterDoa extends MongoRepository<UserDocument, String> {
     Optional<UserDocument> findByMobileNumber(String mobileNumber);
 
     Optional<UserDocument> findByEmailVerificationToken(String token);
+
+    Optional<UserDocument> findByChangePasswordToken(String token);
 }

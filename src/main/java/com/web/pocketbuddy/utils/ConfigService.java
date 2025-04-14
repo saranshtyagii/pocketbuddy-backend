@@ -75,7 +75,7 @@ public class ConfigService {
 
 					PersonalExpenseResponse savedPersonalExpenseResponse = personalExpenseService.addPersonalExpense(
 							AddPersonalExpense.builder()
-									.userID(savedUser.getUserId())
+									.userId(savedUser.getUserId())
 									.description("Validation Pocket Buddy.")
 									.amount(10)
 									.build()
