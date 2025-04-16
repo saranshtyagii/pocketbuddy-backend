@@ -33,6 +33,4 @@ public interface UserService {
 
     public void deleteUserFromDb(String id);
 
-
-    List<GroupDetailsResponse> findUserJoinedGroups(String usernameOrEmail);
 }

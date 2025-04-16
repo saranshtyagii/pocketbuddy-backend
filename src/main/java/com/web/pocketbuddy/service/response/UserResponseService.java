@@ -230,17 +230,6 @@ public class UserResponseService implements UserService {
     }
 
     @Override
-    public List<GroupDetailsResponse> findUserJoinedGroups(String usernameOrEmail) {
-        UserDocument savedUser = fetchUserByUsernameOrEmail(usernameOrEmail);
-        if(savedUser.getUserJoinGroup().isEmpty()) return Collections.emptyList();
-
-        return savedUser.getUserJoinGroup()
-                .stream()
-                .filter(group -> !group.isDeleted())
-                .map(MapperUtils::convertGroupDetailResponse).toList();
-    }
-
-    @Override
     public String verifyEmailWithToken(String token) {
         UserDocument savedDocument = userMasterDoa.findByEmailVerificationToken(token).orElseThrow(() -> new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST));
         if(savedDocument.isEmailVerified()) {

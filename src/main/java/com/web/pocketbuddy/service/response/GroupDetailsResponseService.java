@@ -55,11 +55,6 @@ public class GroupDetailsResponseService implements GroupDetailsService {
     }
 
     @Override
-    public GroupDetailsResponse getGroupDetails(String groupId) {
-        return MapperUtils.convertGroupDetailResponse(fetchGroupById(groupId));
-    }
-
-    @Override
     public GroupDetailsResponse updateGroupDetails(String groupId, GroupDetailsResponse groupDetailsResponse) {
         return null;
     }
