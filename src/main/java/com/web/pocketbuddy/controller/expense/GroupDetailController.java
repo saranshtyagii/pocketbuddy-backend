@@ -2,7 +2,6 @@ package com.web.pocketbuddy.controller.expense;
 
 import com.web.pocketbuddy.constants.UrlsConstants;
 import com.web.pocketbuddy.dto.GroupDetailsResponse;
-import com.web.pocketbuddy.dto.GroupDetailsDto;
 import com.web.pocketbuddy.payload.GroupRegisterDetails;
 import com.web.pocketbuddy.service.GroupDetailsService;
 import lombok.AllArgsConstructor;
@@ -15,7 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping(UrlsConstants.GROUP_URL)
 @AllArgsConstructor
-public class GroupExpenseController {
+public class GroupDetailController {
 
     private final GroupDetailsService groupExpenseService;
 
@@ -44,6 +43,11 @@ public class GroupExpenseController {
     @GetMapping("/remove-groups")
     public ResponseEntity<String> removeGroup(@RequestParam String apiKey) {
         return ResponseEntity.ok(groupExpenseService.deleteGroupFromDb(apiKey, null));
+    }
+
+    @GetMapping("/find-user-joined-groups")
+    public ResponseEntity<List<GroupDetailsResponse>> findUserJoinedGroups(@RequestParam String userId) {
+        return ResponseEntity.ok(groupExpenseService.getAllGroups(userId));
     }
 
 }

@@ -42,9 +42,4 @@ public class UserController {
         return ResponseEntity.ok(userService.verifyMobileNumber(phoneNumber, otp));
     }
 
-    @GetMapping("/find-joined-groups")
-    public ResponseEntity<List<GroupDetailsResponse>> userJoinedGroups(@RequestParam String usernameOrEmail) {
-        return ResponseEntity.ok(userService.findUserJoinedGroups(usernameOrEmail));
-    }
-
 }
