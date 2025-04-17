@@ -1,0 +1,21 @@
+package com.web.pocketbuddy.payload;
+
+import com.web.pocketbuddy.entity.helper.GroupExpenseMetaData;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.Map;
+
+@Getter
+@Setter
+public class RegisterGroupExpense {
+
+    private String groupId;
+    private String description;
+    private double amount;
+
+    private String registerByUserId;
+
+    private Map<String , GroupExpenseMetaData> includedMembers;
+
+}

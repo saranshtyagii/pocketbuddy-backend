@@ -20,4 +20,7 @@ public interface GroupDetailsService {
 
     public String deleteGroupFromDb(String apiKey, String groupId);
 
+    public GroupDocument findGroupDocumentById(String groupId);
+
+    void saveOrUpdate(GroupDocument savedGroup);
 }

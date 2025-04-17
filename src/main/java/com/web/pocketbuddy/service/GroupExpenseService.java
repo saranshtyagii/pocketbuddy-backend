@@ -1,19 +1,19 @@
 package com.web.pocketbuddy.service;
 
 import com.web.pocketbuddy.dto.GroupExpenseDto;
-import com.web.pocketbuddy.payload.GroupExpensePayload;
+import com.web.pocketbuddy.payload.RegisterGroupExpense;
 
 import java.util.List;
 
 public interface GroupExpenseService {
 
-    public GroupExpenseDto addExpense(GroupExpensePayload expensePayload);
-    public GroupExpenseDto updateExpense(GroupExpensePayload expensePayload);
+    public GroupExpenseDto addExpense(RegisterGroupExpense expensePayload);
+    public GroupExpenseDto updateExpense(RegisterGroupExpense expensePayload);
     public String MarkExpenseAsDeleted(String expenseId);
     public String deleteExpense(String expenseId, String apiKey);
     public GroupExpenseDto getExpense(String expenseId);
 
-    public List<GroupExpenseDto> getExpensesByGroupId(String groupId);
+    public List<GroupExpenseDto> fetchGroupExpenseByGroupId(String groupId);
 
 
 }
