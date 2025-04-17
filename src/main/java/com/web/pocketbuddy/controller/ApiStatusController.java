@@ -1,13 +1,13 @@
 package com.web.pocketbuddy.controller;
 
 import com.web.pocketbuddy.constants.UrlsConstants;
-import com.web.pocketbuddy.constants.ConstantsVariables;
 import com.web.pocketbuddy.entity.dao.UserMasterDoa;
 import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.exception.UserApiException;
 import com.web.pocketbuddy.service.mapper.MapperUtils;
 import com.web.pocketbuddy.utils.ConfigService;
 import lombok.AllArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
@@ -28,6 +28,7 @@ import java.util.UUID;
 public class ApiStatusController {
 
     private final UserMasterDoa userMasterDoa;
+    private final ConfigService configService;
 
     @GetMapping("/health")
     public ResponseEntity<String> checkActiveStatus(@RequestParam String apiKey) {
@@ -109,7 +110,22 @@ public class ApiStatusController {
     }
 
     private boolean checkApiKey(String apiKey) {
-        return !apiKey.equals(ConstantsVariables.API_KEY);
+        return !apiKey.equals(ConfigService.getConfig().getApiKey());
+    }
+
+    @GetMapping("/refresh-config")
+    private ResponseEntity<String> fetchRefreshConfig(@RequestParam String apiKey, @RequestParam String adminPassword) {
+
+        if(StringUtils.isBlank(ConfigService.getConfig().getApiKey()) && StringUtils.isBlank(ConfigService.getConfig().getAdminPassword())) {
+            configService.refreshConfig();
+        }
+
+        if(checkApiKey(apiKey) && !adminPassword.equals(ConfigService.getConfig().getAdminPassword())) {
+            throw new UserApiException("It's not that easy my friend :D", HttpStatus.BAD_REQUEST);
+        }
+
+        configService.refreshConfig();
+        return ResponseEntity.ok("Config refreshed successfully.");
     }
 
 }

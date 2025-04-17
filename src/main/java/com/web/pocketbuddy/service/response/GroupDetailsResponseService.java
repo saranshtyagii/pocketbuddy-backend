@@ -11,6 +11,7 @@ import com.web.pocketbuddy.payload.GroupRegisterDetails;
 import com.web.pocketbuddy.service.GroupDetailsService;
 import com.web.pocketbuddy.service.UserService;
 import com.web.pocketbuddy.service.mapper.MapperUtils;
+import com.web.pocketbuddy.utils.ConfigService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -138,7 +139,7 @@ public class GroupDetailsResponseService implements GroupDetailsService {
     @Override
     public String deleteGroupFromDb(String apiKey, String groupId) {
 
-        if(StringUtils.isEmpty(groupId) && !apiKey.equals(ConstantsVariables.API_KEY)) {
+        if(StringUtils.isEmpty(groupId) && !apiKey.equals(ConfigService.getConfig().getApiKey())) {
             throw new GroupApiExceptions("Its not that easy my friend :-)", HttpStatus.FORBIDDEN);
         }
 

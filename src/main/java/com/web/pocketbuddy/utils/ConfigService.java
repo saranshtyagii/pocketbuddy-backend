@@ -81,7 +81,7 @@ public class ConfigService {
 									.build()
 					);
 
-					personalExpenseService.deletePersonalExpenseFromDb(ConstantsVariables.API_KEY, savedPersonalExpenseResponse.getExpenseId());
+					personalExpenseService.deletePersonalExpenseFromDb(ConfigService.getConfig().getApiKey(), savedPersonalExpenseResponse.getExpenseId());
 					userService.deleteUserFromDb(savedUser.getUserId());
 
 					System.err.println("Mongo Validation successfully!");
@@ -123,14 +123,23 @@ public class ConfigService {
 			}
 			return config;
 		} catch (Exception e) {
-
 			return null;
 		}
 	}
 
 	public void setConfig() {
 		System.err.println("Creating new config... Please wait...");
-		configMasterDoa.save(Config.builder().build());
+		configMasterDoa.save(
+				Config.builder()
+						.crmEnabled(false)
+						.crmAccessToken("")
+						.jwtSecretKey("")
+						.apiKey("")
+						.adminPassword("")
+				.build());
 	}
 
+	public void refreshConfig() {
+		loadConfig();
+	}
 }

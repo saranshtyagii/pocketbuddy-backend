@@ -2,9 +2,6 @@ package com.web.pocketbuddy.constants;
 
 public class ConstantsVariables {
 
-    public static final String API_KEY = "pocketbuddy@701109";
-    public static final String JWT_SECRET = "web!pocketbuddy_pcbangur@9412620775#7011097691";
-
     // HTTP Exception Error Message
     public static final String NO_SUCH_USER_FOUND = "No such user found";
     public static final String USER_NOT_FOUND = "User not found";

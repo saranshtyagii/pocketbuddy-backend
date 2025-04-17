@@ -12,6 +12,7 @@ import com.web.pocketbuddy.payload.FetchByDates;
 import com.web.pocketbuddy.service.PersonalExpenseService;
 import com.web.pocketbuddy.service.UserService;
 import com.web.pocketbuddy.service.mapper.MapperUtils;
+import com.web.pocketbuddy.utils.ConfigService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -65,7 +66,7 @@ public class PersonalExpenseResponseService implements PersonalExpenseService {
     @Override
     public String deletePersonalExpenseFromDb(String apiKey, String expenseId) {
 
-        if(!apiKey.equalsIgnoreCase(ConstantsVariables.API_KEY)) {
+        if(!apiKey.equalsIgnoreCase(ConfigService.getConfig().getApiKey())) {
             throw new UserApiException("Invalid Api Key", HttpStatus.UNAUTHORIZED);
         }
 

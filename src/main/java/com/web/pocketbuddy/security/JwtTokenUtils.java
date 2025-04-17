@@ -1,6 +1,8 @@
 package com.web.pocketbuddy.security;
 
 import com.web.pocketbuddy.constants.ConstantsVariables;
+import com.web.pocketbuddy.entity.document.Config;
+import com.web.pocketbuddy.utils.ConfigService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -48,7 +50,7 @@ public class JwtTokenUtils implements Serializable {
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
-                .signWith(SignatureAlgorithm.HS512, ConstantsVariables.JWT_SECRET)
+                .signWith(SignatureAlgorithm.HS512, ConfigService.getConfig().getJwtSecretKey())
                 .compact();
     }
 
@@ -59,7 +61,7 @@ public class JwtTokenUtils implements Serializable {
 
     private Claims getAllClaimsFromToken(String token) {
         return Jwts.parser()
-                .setSigningKey(ConstantsVariables.JWT_SECRET)
+                .setSigningKey(ConfigService.getConfig().getJwtSecretKey())
                 .parseClaimsJws(token)
                 .getBody();
     }
