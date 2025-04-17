@@ -17,5 +17,6 @@ public class Config {
     private String jwtSecretKey;
     private String apiKey;
     private String adminPassword;
+    private boolean validateConnection;
 
 }
