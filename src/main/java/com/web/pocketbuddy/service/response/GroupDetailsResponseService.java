@@ -26,8 +26,6 @@ public class GroupDetailsResponseService implements GroupDetailsService {
 
     private final UserService userService;
     private final GroupDetailsMasterDoa groupDetailsMasterDoa;
-    private final GroupExpenseMasterDoa groupExpenseMasterDoa;
-
 
     @Override
     public GroupDetailsResponse registerGroup(GroupRegisterDetails registerDetails) {
@@ -158,6 +156,16 @@ public class GroupDetailsResponseService implements GroupDetailsService {
             }
         });
         return count + " groups have been deleted";
+    }
+
+    @Override
+    public GroupDocument findGroupDocumentById(String groupId) {
+        return groupDetailsMasterDoa.findById(groupId).orElseThrow(() -> new GroupApiExceptions("Group not found", HttpStatus.NOT_FOUND));
+    }
+
+    @Override
+    public void saveOrUpdate(GroupDocument savedGroup) {
+        groupDetailsMasterDoa.save(savedGroup);
     }
 
 

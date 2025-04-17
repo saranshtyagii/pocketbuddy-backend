@@ -1,5 +1,6 @@
 package com.web.pocketbuddy.dto;
 
+import com.web.pocketbuddy.entity.helper.GroupExpenseMetaData;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,6 +22,6 @@ public class GroupExpenseDto {
     private Date createdAt;
     private boolean edited;
 
-    private Map<String, Map<String,Double>> includedMembers;
+    private Map<String, GroupExpenseMetaData> includedMembers;
 
 }

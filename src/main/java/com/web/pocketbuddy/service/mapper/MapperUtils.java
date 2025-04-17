@@ -7,8 +7,8 @@ import com.web.pocketbuddy.entity.document.GroupExpenseDocument;
 import com.web.pocketbuddy.entity.document.PersonalExpenseDocument;
 import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.payload.AddPersonalExpense;
-import com.web.pocketbuddy.payload.GroupExpensePayload;
 import com.web.pocketbuddy.payload.GroupRegisterDetails;
+import com.web.pocketbuddy.payload.RegisterGroupExpense;
 import com.web.pocketbuddy.payload.RegisterUser;
 import jakarta.validation.constraints.Email;
 import lombok.extern.slf4j.Slf4j;
@@ -142,16 +142,6 @@ public class MapperUtils {
                 .build();
     }
 
-    public static GroupExpenseDocument convertToGroupExpenseDocument(GroupExpensePayload expensePayload) {
-        return GroupExpenseDocument.builder()
-                .groupId(expensePayload.getGroupId())
-                .expenseDescription(expensePayload.getDescription())
-                .expenseAmount(expensePayload.getAmount())
-//                .includedMembers(expensePayload.getIncludedMembers())
-                .registerByUserId(expensePayload.getUserId())
-                .build();
-    }
-
     public static GroupExpenseDto convertToGroupExpenseDto(GroupExpenseDocument expenseDocument) {
         return GroupExpenseDto.builder()
                 .expenseId(expenseDocument.getExpenseId())
@@ -195,6 +185,18 @@ public class MapperUtils {
                 .email(userDocument.getEmail())
                 .username(userDocument.getUsername())
                 .mobileNumber(userDocument.getMobileNumber())
+                .build();
+    }
+
+    public static GroupExpenseDocument convertToGroupExpenseDocument(RegisterGroupExpense expensePayload) {
+        return GroupExpenseDocument.builder()
+                .groupId(expensePayload.getGroupId())
+                .expenseDescription(expensePayload.getDescription())
+                .expenseAmount(expensePayload.getAmount())
+                .includedMembers(expensePayload.getIncludedMembers())
+                .registerByUserId(expensePayload.getRegisterByUserId())
+                .isUpdated(false)
+                .isDeleted(false)
                 .build();
     }
 }

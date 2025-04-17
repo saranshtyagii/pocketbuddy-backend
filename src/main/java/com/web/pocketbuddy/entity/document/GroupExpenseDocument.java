@@ -1,5 +1,6 @@
 package com.web.pocketbuddy.entity.document;
 
+import com.web.pocketbuddy.entity.helper.GroupExpenseMetaData;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -30,7 +31,7 @@ public class GroupExpenseDocument {
     @NotNull
     private double expenseAmount;
 
-    private Map<String, Map<String, Double>> includedMembers;
+    private Map<String, GroupExpenseMetaData> includedMembers;
     @NotNull
     private String registerByUserId;
     @CreatedDate
@@ -38,5 +39,5 @@ public class GroupExpenseDocument {
     @LastModifiedDate
     private Date updatedDate;
     private boolean isUpdated;
-    private Boolean isDeleted;
+    private boolean isDeleted;
 }
