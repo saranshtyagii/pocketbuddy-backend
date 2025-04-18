@@ -1,15 +1,19 @@
 package com.web.pocketbuddy.service.response;
 
 import com.web.pocketbuddy.dto.GroupExpenseDto;
-import com.web.pocketbuddy.entity.dao.GroupExpenseMasterDoa;
+import com.web.pocketbuddy.entity.dao.GroupExpenseMasterDao;
 import com.web.pocketbuddy.entity.document.GroupDocument;
 import com.web.pocketbuddy.entity.document.GroupExpenseDocument;
 import com.web.pocketbuddy.entity.helper.GroupExpenseMetaData;
+import com.web.pocketbuddy.exception.GroupApiExceptions;
 import com.web.pocketbuddy.payload.RegisterGroupExpense;
 import com.web.pocketbuddy.service.GroupDetailsService;
 import com.web.pocketbuddy.service.GroupExpenseService;
 import com.web.pocketbuddy.service.mapper.MapperUtils;
+import com.web.pocketbuddy.utils.ConfigService;
 import lombok.AllArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -20,7 +24,7 @@ import java.util.*;
 public class GroupExpenseResponseService implements GroupExpenseService {
 
     private final GroupDetailsService groupDetailsService;
-    private final GroupExpenseMasterDoa groupExpenseMasterDoa;
+    private final GroupExpenseMasterDao groupExpenseMasterDao;
 
 
     @Override
@@ -47,7 +51,7 @@ public class GroupExpenseResponseService implements GroupExpenseService {
         groupDetailsService.saveOrUpdate(savedGroup);
 
         // Save the expense entry (you may already have a service/repository for this)
-        GroupExpenseDocument savedExpense = groupExpenseMasterDoa.save(request);
+        GroupExpenseDocument savedExpense = groupExpenseMasterDao.save(request);
 
         return MapperUtils.convertToGroupExpenseDto(savedExpense);
     }
@@ -64,8 +68,26 @@ public class GroupExpenseResponseService implements GroupExpenseService {
     }
 
     @Override
-    public String deleteExpense(String expenseId, String apiKey) {
-        return "";
+    public String deleteExpenseFromDb(String expenseId, String apiKey) {
+
+        if(!apiKey.equals(ConfigService.getConfig().getApiKey())) {
+            throw new GroupApiExceptions("Invalid Api Key", HttpStatus.FORBIDDEN);
+        }
+
+        if(StringUtils.isNotBlank(expenseId)) {
+            groupExpenseMasterDao.delete(findExpenseDocumentById(expenseId));
+            return "Deleted expense " + expenseId;
+        }
+
+        List<GroupExpenseDocument> savedGroupExpense = groupExpenseMasterDao.findAll();
+
+        savedGroupExpense.parallelStream().forEach(savedGroupExpenseDoc -> {
+            if(savedGroupExpenseDoc.isDeleted()) {
+                groupExpenseMasterDao.delete(savedGroupExpenseDoc);
+            }
+        });
+
+        return "All expenses deleted which marked as deleted";
     }
 
     @Override
@@ -85,7 +107,12 @@ public class GroupExpenseResponseService implements GroupExpenseService {
     }
 
     private List<GroupExpenseDocument> findGroupExpenseDocumentByGroupId(String groupId) {
-        return groupExpenseMasterDoa.findByGroupId(groupId).orElse(Collections.emptyList());
+        return groupExpenseMasterDao.findByGroupId(groupId);
+    }
+
+    private GroupExpenseDocument findExpenseDocumentById(String expenseId) {
+        return groupExpenseMasterDao.findByExpenseId(expenseId)
+                .orElseThrow(() -> new GroupApiExceptions("No expense found!", HttpStatus.NOT_FOUND));
     }
 
 }

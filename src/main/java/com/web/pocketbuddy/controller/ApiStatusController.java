@@ -1,7 +1,7 @@
 package com.web.pocketbuddy.controller;
 
 import com.web.pocketbuddy.constants.UrlsConstants;
-import com.web.pocketbuddy.entity.dao.UserMasterDoa;
+import com.web.pocketbuddy.entity.dao.UserMasterDao;
 import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.exception.UserApiException;
 import com.web.pocketbuddy.service.mapper.MapperUtils;
@@ -27,7 +27,7 @@ import java.util.UUID;
 @RequestMapping(UrlsConstants.BASE_URL_V1 + "/status")
 public class ApiStatusController {
 
-    private final UserMasterDoa userMasterDoa;
+    private final UserMasterDao userMasterDoa;
     private final ConfigService configService;
 
     @GetMapping("/health")

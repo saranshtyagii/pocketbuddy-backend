@@ -1,7 +1,7 @@
 package com.web.pocketbuddy.security;
 
 import com.web.pocketbuddy.constants.ConstantsVariables;
-import com.web.pocketbuddy.entity.dao.UserMasterDoa;
+import com.web.pocketbuddy.entity.dao.UserMasterDao;
 import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.exception.UserApiException;
 import lombok.AllArgsConstructor;
@@ -18,7 +18,7 @@ import java.util.Collections;
 @AllArgsConstructor
 public class JwtUserDetailService implements UserDetailsService {
 
-    private final UserMasterDoa userMasterDoa;
+    private final UserMasterDao userMasterDoa;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

@@ -6,8 +6,11 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
 import java.util.Optional;
 
-public interface GroupExpenseMasterDoa extends MongoRepository<GroupExpenseDocument, String> {
-    Optional<List<GroupExpenseDocument>> findByGroupId(String groupId);
+public interface GroupExpenseMasterDao extends MongoRepository<GroupExpenseDocument, String> {
+
+    List<GroupExpenseDocument> findByGroupId(String groupId);
 
     void deleteByGroupId(String groupId);
+
+    Optional<GroupExpenseDocument> findByExpenseId(String expenseId);
 }

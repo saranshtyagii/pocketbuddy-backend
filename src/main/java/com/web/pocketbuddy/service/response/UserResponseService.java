@@ -3,9 +3,8 @@ package com.web.pocketbuddy.service.response;
 import com.web.pocketbuddy.constants.ConstantsVariables;
 import com.web.pocketbuddy.constants.NotificationTemplate;
 import com.web.pocketbuddy.constants.UrlsConstants;
-import com.web.pocketbuddy.dto.GroupDetailsResponse;
 import com.web.pocketbuddy.dto.UserDetailResponse;
-import com.web.pocketbuddy.entity.dao.UserMasterDoa;
+import com.web.pocketbuddy.entity.dao.UserMasterDao;
 import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.entity.helper.DeviceDetail;
 import com.web.pocketbuddy.utils.GenerateUtils;
@@ -30,7 +29,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class UserResponseService implements UserService {
 
-    private final UserMasterDoa userMasterDoa;
+    private final UserMasterDao userMasterDoa;
     private final PasswordEncoder passwordEncoder;
     private final NotificationService notificationService;
     private final RedisServices redisServices;

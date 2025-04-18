@@ -6,11 +6,9 @@ import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 @Document
@@ -19,25 +17,31 @@ import java.util.Map;
 @AllArgsConstructor
 @Getter
 @Setter
-@EnableMongoAuditing
 public class GroupExpenseDocument {
 
     @Id
     private String expenseId;
+
     @NotNull
     private String groupId;
 
     private String expenseDescription;
+
     @NotNull
     private double expenseAmount;
 
     private Map<String, GroupExpenseMetaData> includedMembers;
+
     @NotNull
     private String registerByUserId;
+
     @CreatedDate
     private Date createdDate;
+
     @LastModifiedDate
     private Date updatedDate;
+
     private boolean isUpdated;
+
     private boolean isDeleted;
 }

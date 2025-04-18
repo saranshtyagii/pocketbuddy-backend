@@ -6,7 +6,6 @@ import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
@@ -18,23 +17,29 @@ import java.util.Map;
 @AllArgsConstructor
 @Getter
 @Setter
-@EnableMongoAuditing
 public class GroupDocument {
 
     @Id
     private String groupId;
+
+    // Ensure this is unique at the DB level using indexing
+    private String groupDiscoverableId;
+
     @NotNull
     private String groupName;
+
     private String description;
 
     @CreatedDate
     private Date createDate;
+
     @LastModifiedDate
     private Date lastUpdateDate;
+
     @NotNull
     private String createdByUser;
 
-    private Map<String, Double> members; // userID, UserName, ExpenseAmount
+    private Map<String, Double> members; // Map<userId, totalExpense>
 
     private SettlementCycle settlementCycle;
 
@@ -46,7 +51,4 @@ public class GroupDocument {
 
     private boolean deleted;
     private Date groupDeletedDate;
-
-
-
 }
