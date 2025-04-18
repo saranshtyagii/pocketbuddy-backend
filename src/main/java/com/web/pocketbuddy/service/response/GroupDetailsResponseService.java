@@ -1,9 +1,7 @@
 package com.web.pocketbuddy.service.response;
 
-import com.web.pocketbuddy.constants.ConstantsVariables;
 import com.web.pocketbuddy.dto.GroupDetailsResponse;
-import com.web.pocketbuddy.entity.dao.GroupDetailsMasterDoa;
-import com.web.pocketbuddy.entity.dao.GroupExpenseMasterDoa;
+import com.web.pocketbuddy.entity.dao.GroupDetailsMasterDao;
 import com.web.pocketbuddy.entity.document.GroupDocument;
 import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.exception.GroupApiExceptions;
@@ -26,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class GroupDetailsResponseService implements GroupDetailsService {
 
     private final UserService userService;
-    private final GroupDetailsMasterDoa groupDetailsMasterDoa;
+    private final GroupDetailsMasterDao groupDetailsMasterDoa;
 
     @Override
     public GroupDetailsResponse registerGroup(GroupRegisterDetails registerDetails) {
@@ -111,6 +109,26 @@ public class GroupDetailsResponseService implements GroupDetailsService {
     }
 
     @Override
+    public void deleteFromDb(String groupId, String apiKey) {
+        if(!apiKey.equals(ConfigService.getConfig().getApiKey())) {
+            throw new GroupApiExceptions("Invalid Api Key", HttpStatus.FORBIDDEN);
+        }
+
+        if(org.apache.commons.lang3.StringUtils.isNotBlank(groupId)) {
+            groupDetailsMasterDoa.deleteById(groupId);
+            return;
+        }
+
+        List<GroupDocument> savedGroup = groupDetailsMasterDoa.findAll();
+
+        savedGroup.parallelStream().forEach(group -> {
+            if(group.isDeleted()) {
+                groupDetailsMasterDoa.delete(group);
+            }
+        });
+    }
+
+    @Override
     public List<GroupDetailsResponse> getAllGroups(String userId) {
         UserDocument userDocument = userService.findUserById(userId);
 
@@ -144,7 +162,7 @@ public class GroupDetailsResponseService implements GroupDetailsService {
         }
 
         if(!StringUtils.isEmpty(groupId)) {
-            groupDetailsMasterDoa.deleteById(groupId);
+            groupDetailsMasterDoa.delete(fetchGroupById(groupId));
             return "Group " + groupId + " has been deleted";
         }
 
@@ -171,7 +189,7 @@ public class GroupDetailsResponseService implements GroupDetailsService {
 
 
     private GroupDocument fetchGroupById(String groupId) {
-        return groupDetailsMasterDoa.findById(groupId)
+        return groupDetailsMasterDoa.findByGroupId(groupId)
                 .orElseThrow(() -> new GroupApiExceptions("No such group found!", HttpStatus.NOT_FOUND));
     }
 

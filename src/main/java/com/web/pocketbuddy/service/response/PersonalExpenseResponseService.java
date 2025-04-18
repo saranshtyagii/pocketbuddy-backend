@@ -1,8 +1,7 @@
 package com.web.pocketbuddy.service.response;
 
-import com.web.pocketbuddy.constants.ConstantsVariables;
 import com.web.pocketbuddy.dto.PersonalExpenseResponse;
-import com.web.pocketbuddy.entity.dao.PersonalExpenseMasterDoa;
+import com.web.pocketbuddy.entity.dao.PersonalExpenseMasterDao;
 import com.web.pocketbuddy.entity.document.PersonalExpenseDocument;
 import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.exception.UserApiException;
@@ -29,7 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @RequiredArgsConstructor
 public class PersonalExpenseResponseService implements PersonalExpenseService {
 
-    private final PersonalExpenseMasterDoa personalExpenseMasterDoa;
+    private final PersonalExpenseMasterDao personalExpenseMasterDoa;
     private final UserService userService;
 
     @Override
