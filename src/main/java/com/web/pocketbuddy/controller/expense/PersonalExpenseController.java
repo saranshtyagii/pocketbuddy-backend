@@ -45,4 +45,9 @@ public class PersonalExpenseController {
         return ResponseEntity.ok(personalExpenseService.fetchAllPersonalExpensesByUserId(userId));
     }
 
+    @PostMapping("/fetch-by-dates")
+    public ResponseEntity<List<PersonalExpenseResponse>> fetchByDates(@RequestBody FindExpenseByDates details) {
+        return ResponseEntity.ok(personalExpenseService.fetchAllExpenseByDates(details));
+    }
+
 }

@@ -1,27 +1,30 @@
 package com.web.pocketbuddy.service.response;
 
 import com.web.pocketbuddy.dto.PersonalExpenseResponse;
+import com.web.pocketbuddy.entity.dao.GroupExpenseMasterDao;
 import com.web.pocketbuddy.entity.dao.PersonalExpenseMasterDao;
+import com.web.pocketbuddy.entity.document.GroupExpenseDocument;
 import com.web.pocketbuddy.entity.document.PersonalExpenseDocument;
 import com.web.pocketbuddy.entity.document.UserDocument;
+import com.web.pocketbuddy.exception.GroupApiExceptions;
 import com.web.pocketbuddy.exception.UserApiException;
 import com.web.pocketbuddy.exception.UserPersonalExpenseException;
 import com.web.pocketbuddy.payload.AddPersonalExpense;
 import com.web.pocketbuddy.payload.FetchByDates;
+import com.web.pocketbuddy.payload.FindExpenseByDates;
 import com.web.pocketbuddy.service.PersonalExpenseService;
 import com.web.pocketbuddy.service.UserService;
 import com.web.pocketbuddy.service.mapper.MapperUtils;
 import com.web.pocketbuddy.utils.ConfigService;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.mapper.Mapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -30,6 +33,7 @@ public class PersonalExpenseResponseService implements PersonalExpenseService {
 
     private final PersonalExpenseMasterDao personalExpenseMasterDoa;
     private final UserService userService;
+    private final GroupExpenseMasterDao groupExpenseMasterDao;
 
     @Override
     public PersonalExpenseResponse addPersonalExpense(AddPersonalExpense expense) {
@@ -186,6 +190,37 @@ public class PersonalExpenseResponseService implements PersonalExpenseService {
         double sum = getLastMonthTotalSum(userId);
         UserDocument savedUserResponse = userService.findUserById(userId);
         return sum < savedUserResponse.getUserMonthlyExpense();
+    }
+
+    @Override
+    public List<PersonalExpenseResponse> fetchAllExpenseByDates(FindExpenseByDates details) {
+        if(StringUtils.isEmpty(details.getUserId())) {
+            throw new UserApiException("User Id can't be empty", HttpStatus.NOT_FOUND);
+        }
+
+        List<PersonalExpenseDocument> savedExpenses = fetchAllExpensesByUserId(details.getUserId());
+        if(ObjectUtils.isEmpty(savedExpenses)) {
+            return Collections.emptyList();
+        }
+
+        return savedExpenses.stream()
+                .filter(expense ->
+                        expense.getExpenseDate().after(details.getStartDate())
+                                && expense.getExpenseDate().before(details.getEndDate()))
+                .map(MapperUtils::convertTOPersonalExpenseResponse)
+                .toList();
+    }
+
+    private List<PersonalExpenseDocument> fetchAllExpensesByUserId(String userId) {
+
+        List<PersonalExpenseDocument> savedExpenses = personalExpenseMasterDoa.findAllByUserId(userId).orElse(null);
+        if(ObjectUtils.isEmpty(savedExpenses)) {
+            return Collections.emptyList();
+        }
+
+        return savedExpenses.stream()
+                .filter(expense -> !expense.isDeleted())
+                .toList();
     }
 
     private PersonalExpenseDocument fetchPersonalExpenseDocumentById(String expenseId) {

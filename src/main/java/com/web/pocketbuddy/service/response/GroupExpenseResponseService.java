@@ -1,11 +1,13 @@
 package com.web.pocketbuddy.service.response;
 
 import com.web.pocketbuddy.dto.GroupExpenseDto;
+import com.web.pocketbuddy.dto.PersonalExpenseResponse;
 import com.web.pocketbuddy.entity.dao.GroupExpenseMasterDao;
 import com.web.pocketbuddy.entity.document.GroupDocument;
 import com.web.pocketbuddy.entity.document.GroupExpenseDocument;
 import com.web.pocketbuddy.entity.helper.GroupExpenseMetaData;
 import com.web.pocketbuddy.exception.GroupApiExceptions;
+import com.web.pocketbuddy.payload.FindExpenseByDates;
 import com.web.pocketbuddy.payload.RegisterGroupExpense;
 import com.web.pocketbuddy.service.GroupDetailsService;
 import com.web.pocketbuddy.service.GroupExpenseService;
@@ -16,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.util.*;
 
@@ -113,6 +116,51 @@ public class GroupExpenseResponseService implements GroupExpenseService {
     private GroupExpenseDocument findExpenseDocumentById(String expenseId) {
         return groupExpenseMasterDao.findByExpenseId(expenseId)
                 .orElseThrow(() -> new GroupApiExceptions("No expense found!", HttpStatus.NOT_FOUND));
+    }
+
+
+    @Override
+    public List<GroupExpenseDto> fetchAllExpenseByDates(FindExpenseByDates details) {
+        if(org.springframework.util.StringUtils.isEmpty(details.getGroupId()) || org.springframework.util.StringUtils.isEmpty(details.getUserId())) {
+            throw new GroupApiExceptions("Group id is empty!", HttpStatus.BAD_REQUEST);
+        }
+
+        List<GroupExpenseDocument> savedExpenses = fetchAllExpensesByGroup(details.getGroupId());
+        if(ObjectUtils.isEmpty(savedExpenses)) {
+            return Collections.emptyList();
+        }
+
+        return savedExpenses.stream()
+                .filter(groupExpense ->
+                       groupExpense.getCreatedDate().after(details.getStartDate())
+                                && groupExpense.getCreatedDate().before(details.getStartDate()))
+                .map(MapperUtils::convertToGroupExpenseDto)
+                .toList();
+    }
+
+    private List<GroupExpenseDocument> fetchAllExpensesByGroupAndUser(String groupId, String userId) {
+
+        List<GroupExpenseDocument> savedExpenses = groupExpenseMasterDao.findByGroupId(groupId);
+        if(ObjectUtils.isEmpty(savedExpenses)) {
+            return Collections.emptyList();
+        }
+
+        return savedExpenses.stream()
+                .filter(expense -> !expense.isDeleted())
+                .filter(expense -> userId.equals(expense.getRegisterByUserId()))
+                .toList();
+    }
+
+    private List<GroupExpenseDocument> fetchAllExpensesByGroup(String groupId) {
+
+        List<GroupExpenseDocument> savedExpenses = groupExpenseMasterDao.findByGroupId(groupId);
+        if(ObjectUtils.isEmpty(savedExpenses)) {
+            return Collections.emptyList();
+        }
+
+        return savedExpenses.stream()
+                .filter(expense -> !expense.isDeleted())
+                .toList();
     }
 
 }

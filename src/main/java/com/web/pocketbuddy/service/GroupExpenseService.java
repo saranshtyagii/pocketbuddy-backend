@@ -1,6 +1,7 @@
 package com.web.pocketbuddy.service;
 
 import com.web.pocketbuddy.dto.GroupExpenseDto;
+import com.web.pocketbuddy.payload.FindExpenseByDates;
 import com.web.pocketbuddy.payload.RegisterGroupExpense;
 
 import java.util.List;
@@ -15,5 +16,5 @@ public interface GroupExpenseService {
 
     public List<GroupExpenseDto> fetchGroupExpenseByGroupId(String groupId);
 
-
+    public List<GroupExpenseDto> fetchAllExpenseByDates(FindExpenseByDates details);
 }

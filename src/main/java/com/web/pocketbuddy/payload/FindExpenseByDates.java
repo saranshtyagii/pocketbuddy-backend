@@ -8,7 +8,8 @@ import java.util.Date;
 @Getter
 @Setter
 public class FindExpenseByDates {
-    private String userID;
+    private String userId;
+    private String groupId;
     private Date startDate;
     private Date endDate;
 }

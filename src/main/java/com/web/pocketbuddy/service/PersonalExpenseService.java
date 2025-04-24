@@ -3,6 +3,7 @@ package com.web.pocketbuddy.service;
 import com.web.pocketbuddy.dto.PersonalExpenseResponse;
 import com.web.pocketbuddy.payload.AddPersonalExpense;
 import com.web.pocketbuddy.payload.FetchByDates;
+import com.web.pocketbuddy.payload.FindExpenseByDates;
 
 import java.util.List;
 
@@ -25,4 +26,5 @@ public interface PersonalExpenseService {
 
     public boolean compareExpenseAmountWithMonthlyBudget(String userId);
 
+    List<PersonalExpenseResponse> fetchAllExpenseByDates(FindExpenseByDates details);
 }
