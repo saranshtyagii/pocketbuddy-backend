@@ -67,7 +67,11 @@ public class GroupExpenseResponseService implements GroupExpenseService {
 
     @Override
     public String MarkExpenseAsDeleted(String expenseId) {
-        return "";
+        GroupExpenseDocument savedExpense = groupExpenseMasterDao.findByExpenseId(expenseId)
+                .orElseThrow(() -> new GroupApiExceptions("Expense Not Found!", HttpStatus.NOT_FOUND));
+        savedExpense.setDeleted(true);
+        groupExpenseMasterDao.save(savedExpense);
+        return "Expense has been deleted";
     }
 
     @Override
