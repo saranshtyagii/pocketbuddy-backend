@@ -35,8 +35,9 @@ public class UserDocument {
     private String username;
     @Email
     private String email;
-    @NotNull
+    
     private String password;
+    private Boolean loginWithMobile;
 
     @CreatedDate
     private Date createdDate;

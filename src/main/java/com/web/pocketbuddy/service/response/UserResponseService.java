@@ -50,6 +50,7 @@ public class UserResponseService implements UserService {
         }
 
         UserDocument requestedUser = MapperUtils.toUserDocument(registerUser);
+        requestedUser.setLoginWithMobile(false);
         if(registerUser.getPassword().length() < ConstantsVariables.MINIMUM_PASSWORD_LENGTH) {
             throw new UserApiException(ConstantsVariables.WEEK_PASSWORD, HttpStatus.BAD_REQUEST);
         }
@@ -108,14 +109,37 @@ public class UserResponseService implements UserService {
     @Override
     public String generateOneTimePasswordForMobile(String mobileNumber) {
         UserDocument savedUser = userMasterDoa.findByMobileNumber(mobileNumber)
-                .orElseThrow(() -> new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST));
+                .orElse(null);
 
-        String otp = GenerateUtils.generateOtp(mobileNumber);
-        savedUser.setOneTimePassword(otp);
-
-        // ToDo :: Send Otp to register mobile number
+        if(ObjectUtils.isEmpty(savedUser)) {
+            saveAndGenerateOneTimePasswordForMobile(mobileNumber);
+        } else {
+            resendOneTimePasswordForMobile(mobileNumber, null);
+        }
 
         return ConstantsVariables.OTP_SEND_MESSAGE + maskedString(savedUser.getMobileNumber(), false);
+    }
+
+    private void saveAndGenerateOneTimePasswordForMobile(String mobileNumber) {
+
+        UserDocument userDocument = new UserDocument();
+        userDocument.setUserFirstName("Pocket Buddy");
+        userDocument.setUsername(mobileNumber);
+        userDocument.setLoginWithMobile(true);
+        userDocument.setPassword(passwordEncoder.encode("pocketbuddy_"+mobileNumber+"_password"));
+        String otp = GenerateUtils.generateOtp(mobileNumber);
+        userDocument.setOneTimePassword(otp);
+
+        userMasterDoa.save(userDocument);
+        resendOneTimePasswordForMobile(mobileNumber, otp);
+    }
+
+    private void resendOneTimePasswordForMobile(String mobileNumber, String otp) {
+        if(StringUtils.isEmpty(otp)) {
+            String otpCode = GenerateUtils.generateOtp(mobileNumber);
+        }
+
+
     }
 
     @Override

@@ -27,6 +27,4 @@ public class GroupExpenseController {
     public ResponseEntity<GroupExpenseDto> registerGroupExpense(@RequestBody RegisterGroupExpense request) {
         return ResponseEntity.ok(groupExpenseService.addExpense(request));
     }
-
-
 }
