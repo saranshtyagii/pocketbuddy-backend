@@ -9,7 +9,7 @@ import java.util.List;
 public interface GroupExpenseService {
 
     public GroupExpenseDto addExpense(RegisterGroupExpense expensePayload);
-    public GroupExpenseDto updateExpense(RegisterGroupExpense expensePayload);
+    public GroupExpenseDto updateExpense(GroupExpenseDto expenseDto);
     public String MarkExpenseAsDeleted(String expenseId);
     public String deleteExpenseFromDb(String expenseId, String apiKey);
     public GroupExpenseDto getExpense(String expenseId);

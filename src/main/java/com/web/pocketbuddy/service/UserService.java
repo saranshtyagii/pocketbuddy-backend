@@ -1,19 +1,16 @@
 package com.web.pocketbuddy.service;
 
-import com.web.pocketbuddy.dto.GroupDetailsResponse;
 import com.web.pocketbuddy.dto.UserDetailResponse;
 import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.payload.RegisterUser;
 import com.web.pocketbuddy.payload.UserCredentials;
 
-import java.util.List;
-
 public interface UserService {
 
     public UserDetailResponse registerUser(RegisterUser registerUser);
-    public UserDetailResponse findUserByUsername(String username);
+    public UserDetailResponse findUserByEmail(String username);
     public UserDocument findUserById(String id);
-    public UserDetailResponse findUserByEmail(String email);
+
     public UserDetailResponse findUserByPhone(String phone);
 
     public void savedUpdatedUser(UserDocument userDocument);
@@ -33,4 +30,5 @@ public interface UserService {
 
     public void deleteUserFromDb(String id);
 
+    boolean isEmailVerified(String email);
 }

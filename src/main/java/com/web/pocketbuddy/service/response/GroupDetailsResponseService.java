@@ -38,7 +38,9 @@ public class GroupDetailsResponseService implements GroupDetailsService {
         if(CollectionUtils.isEmpty(joinedGroupIds)) {
             joinedGroupIds = new ArrayList<>();
         }
-
+        Map<String, Double> members = new HashMap<>();
+        members.put(registerDetails.getCreatedByUser(), 0.0);
+        createGroupDocument.setMembers(members);
         // create Group
         GroupDocument savedGroup = groupDetailsMasterDoa.save(createGroupDocument);
 
@@ -52,8 +54,13 @@ public class GroupDetailsResponseService implements GroupDetailsService {
     }
 
     @Override
-    public GroupDetailsResponse updateGroupDetails(String groupId, GroupDetailsResponse groupDetailsResponse) {
-        return null;
+    public GroupDetailsResponse updateGroupDetails(GroupDetailsResponse groupDetailsResponse) {
+        GroupDocument savedGroup = fetchGroupById(groupDetailsResponse.getGroupId());
+
+        savedGroup.setGroupName(groupDetailsResponse.getGroupName());
+        savedGroup.setDescription(groupDetailsResponse.getGroupDescription());
+
+        return MapperUtils.convertGroupDetailResponse(groupDetailsMasterDoa.save(savedGroup));
     }
 
     @Override

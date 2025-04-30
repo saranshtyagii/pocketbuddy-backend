@@ -1,14 +1,11 @@
 package com.web.pocketbuddy.controller.user;
 
 import com.web.pocketbuddy.constants.UrlsConstants;
-import com.web.pocketbuddy.dto.GroupDetailsResponse;
 import com.web.pocketbuddy.dto.UserDetailResponse;
 import com.web.pocketbuddy.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping(UrlsConstants.USER_URL)
@@ -18,8 +15,8 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/find")
-    public ResponseEntity<UserDetailResponse> fetchUserDetail(@RequestParam String usernameOrEmail) {
-        return ResponseEntity.ok(userService.findUserByUsername(usernameOrEmail));
+    public ResponseEntity<UserDetailResponse> fetchUserDetail(@RequestParam String email) {
+        return ResponseEntity.ok(userService.findUserByEmail(email));
     }
 
     @PutMapping("/update")

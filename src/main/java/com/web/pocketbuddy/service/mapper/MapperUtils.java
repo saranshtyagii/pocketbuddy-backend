@@ -27,7 +27,6 @@ public class MapperUtils {
         return UserDocument.builder()
                 .userFirstName(registerUser.getUserFirstName())
                 .userLastName(registerUser.getUserLastName())
-                .username(registerUser.getUsername())
                 .email(registerUser.getEmail())
                 .mobileNumber(registerUser.getMobileNumber())
                 .subscribeEmailNotification(true) // Default value
@@ -40,7 +39,6 @@ public class MapperUtils {
                 .userId(userDocument.getUserId())
                 .userFirstName(userDocument.getUserFirstName())
                 .userLastName(userDocument.getUserLastName())
-                .username(userDocument.getUsername())
                 .email(userDocument.getEmail())
                 .mobileNumber(userDocument.getMobileNumber())
                 .build();
@@ -111,6 +109,7 @@ public class MapperUtils {
                 .groupDescription(savedGroupDocument.getDescription())
                 .createdByUserId(savedGroupDocument.getCreatedByUser())
                 .createdAt(savedGroupDocument.getCreateDate())
+                .joinedMembers(savedGroupDocument.getMembers())
                 .build();
 
     }
@@ -183,8 +182,8 @@ public class MapperUtils {
                 .userFirstName(userDocument.getUserFirstName())
                 .userLastName(userDocument.getUserLastName())
                 .email(userDocument.getEmail())
-                .username(userDocument.getUsername())
                 .mobileNumber(userDocument.getMobileNumber())
+                .emailVerified(userDocument.isEmailVerified())
                 .build();
     }
 

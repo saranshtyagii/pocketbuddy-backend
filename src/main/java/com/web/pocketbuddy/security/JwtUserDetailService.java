@@ -21,12 +21,12 @@ public class JwtUserDetailService implements UserDetailsService {
     private final UserMasterDao userMasterDoa;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserDocument savedUser = userMasterDoa.findByEmailOrUsername(username, username)
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        UserDocument savedUser = userMasterDoa.findByEmail(email)
                 .orElseThrow(() -> new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST));
 
         return new User(
-                savedUser.getUsername(),
+                savedUser.getEmail(),
                 savedUser.getPassword(),
                 Collections.emptyList()
         );

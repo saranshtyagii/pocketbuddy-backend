@@ -22,7 +22,7 @@ public class GroupDetailController {
 
     @PostMapping("/new-group")
     public ResponseEntity<GroupDetailsResponse> registerGroup(@RequestBody GroupRegisterDetails registerDetails) {
-        return new ResponseEntity<>(groupExpenseService.registerGroup(registerDetails), HttpStatus.CREATED);
+        return new ResponseEntity<>(groupExpenseService.registerGroup(registerDetails), HttpStatus.OK);
     }
 
     @PatchMapping("/join-group")

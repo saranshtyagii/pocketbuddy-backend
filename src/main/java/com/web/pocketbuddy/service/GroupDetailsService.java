@@ -10,7 +10,7 @@ import java.util.List;
 public interface GroupDetailsService {
 
     public GroupDetailsResponse registerGroup(GroupRegisterDetails registerDetails);
-    public GroupDetailsResponse updateGroupDetails(String groupId, GroupDetailsResponse groupDetailsResponse);
+    public GroupDetailsResponse updateGroupDetails(GroupDetailsResponse groupDetailsResponse);
     public String deleteGroup(String groupId, String userId);
     public GroupDetailsResponse joinGroup(String groupId, String userId);
     public void deleteFromDb(String groupId, String apiKey);

@@ -15,8 +15,6 @@ public class RegisterUser {
     private String userFirstName;
     private String userLastName;
 
-    @NotNull
-    private String username;
     @Email
     private String email;
     private String mobileNumber;

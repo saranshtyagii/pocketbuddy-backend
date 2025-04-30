@@ -11,13 +11,17 @@ import com.web.pocketbuddy.security.JwtTokenUtils;
 import com.web.pocketbuddy.security.JwtUserDetailService;
 import com.web.pocketbuddy.service.UserService;
 import com.web.pocketbuddy.service.mapper.MapperUtils;
+import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,13 +38,13 @@ public class AuthenticationController {
 
         try {
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(userCredentials.getUsernameOrEmail(), userCredentials.getPassword())
+                    new UsernamePasswordAuthenticationToken(userCredentials.getEmail(), userCredentials.getPassword())
             );
         } catch (Exception e) {
             throw new UserApiException("Invalid password", HttpStatus.UNAUTHORIZED);
         }
 
-        UserDetails userDetails = userDetailService.loadUserByUsername(userCredentials.getUsernameOrEmail());
+        UserDetails userDetails = userDetailService.loadUserByUsername(userCredentials.getEmail());
         TokenResponse tokenResponse = new TokenResponse(jwtTokenUtils.generateToken(userDetails));
 
         userService.saveUserTokenAndData(userCredentials, tokenResponse.getToken());
@@ -81,8 +85,14 @@ public class AuthenticationController {
     }
 
     @GetMapping("/verify/email")
-    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
-        return ResponseEntity.ok(userService.verifyEmailWithToken(token));
+    public ResponseEntity<Void> verifyEmail(@RequestParam String token) {
+        String email = userService.verifyEmailWithToken(token);
+        if(StringUtils.isNotBlank(email)) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setLocation(URI.create("/template/email-verification-successfully?email=" + email));
+            return new ResponseEntity<>(headers, HttpStatus.FOUND);
+        }
+        return ResponseEntity.ok().build();
     }
 
 }

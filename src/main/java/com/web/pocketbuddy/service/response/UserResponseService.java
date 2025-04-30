@@ -37,9 +37,6 @@ public class UserResponseService implements UserService {
     @Override
     public UserDetailResponse registerUser(RegisterUser registerUser) {
 
-        if(!isUsernameExist(registerUser.getUsername())) {
-            throw new UserApiException(ConstantsVariables.USERNAME_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
-        }
         if(!isEmailExist(registerUser.getEmail())) {
             throw new UserApiException(ConstantsVariables.EMAIL_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
         }
@@ -72,13 +69,8 @@ public class UserResponseService implements UserService {
     }
 
     @Override
-    public UserDetailResponse findUserByUsername(String usernameOrEmail) {
-        return MapperUtils.UserDetailResponse(fetchUserByUsernameOrEmail(usernameOrEmail));
-    }
-
-    @Override
     public UserDetailResponse findUserByEmail(String email) {
-        return null;
+        return MapperUtils.UserDetailResponse(fetchUserByEmail(email));
     }
 
     @Override
@@ -101,7 +93,7 @@ public class UserResponseService implements UserService {
     }
 
     @Override
-    public String generateOneTimePasswordForEmail(String usernameOrEmail) {
+    public String generateOneTimePasswordForEmail(String email) {
         return "";
     }
 
@@ -124,7 +116,6 @@ public class UserResponseService implements UserService {
 
         UserDocument userDocument = new UserDocument();
         userDocument.setUserFirstName("Pocket Buddy");
-        userDocument.setUsername(mobileNumber);
         userDocument.setLoginWithMobile(true);
         userDocument.setPassword(passwordEncoder.encode("pocketbuddy_"+mobileNumber+"_password"));
         String otp = GenerateUtils.generateOtp(mobileNumber);
@@ -150,7 +141,7 @@ public class UserResponseService implements UserService {
     @Override
     public void saveUserTokenAndData(UserCredentials userCredentials, String token) {
         try {
-            UserDocument savedUser = fetchUserByUsernameOrEmail(userCredentials.getUsernameOrEmail());
+            UserDocument savedUser = fetchUserByEmail(userCredentials.getEmail());
 
             // Update basic user login data
             savedUser.setLastLoginDate(new Date());
@@ -191,8 +182,8 @@ public class UserResponseService implements UserService {
     }
 
     @Override
-    public String generateChangePasswordToken(String usernameOrEmail) {
-        UserDocument savedUser = userMasterDoa.findByEmailOrUsername(usernameOrEmail, usernameOrEmail)
+    public String generateChangePasswordToken(String email) {
+        UserDocument savedUser = userMasterDoa.findByEmail(email)
                 .orElseThrow(() -> new UserApiException(ConstantsVariables.USER_NOT_FOUND, HttpStatus.NOT_FOUND));
         if(!savedUser.isEmailVerified()) throw new UserApiException("Email is not verified", HttpStatus.BAD_REQUEST);
 
@@ -202,13 +193,13 @@ public class UserResponseService implements UserService {
             if(ObjectUtils.isEmpty(savedToken)) {
                 savedToken = GenerateUtils.generateToken();
                 savedUser.setChangePasswordToken(savedToken.toString());
-                redisServices.set(usernameOrEmail, savedToken,5L * 60);
+                redisServices.set(email, savedToken,5L * 60);
                 savedUpdatedUser(savedUser);
             }
         } catch (Exception e) {
             savedToken = GenerateUtils.generateToken();
             savedUser.setChangePasswordToken(savedToken.toString());
-            redisServices.set(usernameOrEmail, savedToken);
+            redisServices.set(email, savedToken);
             savedUpdatedUser(savedUser);
         }
 
@@ -239,9 +230,9 @@ public class UserResponseService implements UserService {
 
 
     @Override
-    public String updateMobileNumber(String mobileNumber, String usernameOrEmail) {
-        UserDocument savedUser = fetchUserByUsernameOrEmail(usernameOrEmail);
-        savedUser.setOneTimePassword(GenerateUtils.generateOtp(usernameOrEmail));
+    public String updateMobileNumber(String mobileNumber, String email) {
+        UserDocument savedUser = fetchUserByEmail(email);
+        savedUser.setOneTimePassword(GenerateUtils.generateOtp(email));
         userMasterDoa.save(savedUser);
         return ConstantsVariables.OTP_SEND_MESSAGE + maskedString(savedUser.getMobileNumber(), false);
     }
@@ -253,20 +244,23 @@ public class UserResponseService implements UserService {
     }
 
     @Override
+    public boolean isEmailVerified(String email) {
+        UserDocument userDocument = fetchUserByEmail(email);
+        return userDocument.isEmailVerified();
+    }
+
+    @Override
     public String verifyEmailWithToken(String token) {
         UserDocument savedDocument = userMasterDoa.findByEmailVerificationToken(token).orElseThrow(() -> new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST));
         if(savedDocument.isEmailVerified()) {
             throw new UserApiException("Email already verified", HttpStatus.BAD_REQUEST);
         }
         savedDocument.setEmailVerified(true);
+        savedDocument.setEmailVerificationToken(null);
         userMasterDoa.save(savedDocument);
-        return "Email verified";
+        return savedDocument.getEmail();
     }
 
-    private boolean isUsernameExist(String username) {
-         UserDocument savedUser = userMasterDoa.findByUsername(username).orElse(null);
-         return ObjectUtils.isEmpty(savedUser);
-    }
 
     private boolean isEmailExist(String email) {
         UserDocument savedUser = userMasterDoa.findByEmail(email).orElse(null);
@@ -299,8 +293,8 @@ public class UserResponseService implements UserService {
         }
     }
 
-    private UserDocument fetchUserByUsernameOrEmail(String usernameOrEmail) {
-        return userMasterDoa.findByEmailOrUsername(usernameOrEmail, usernameOrEmail)
+    private UserDocument fetchUserByEmail(String email) {
+        return userMasterDoa.findByEmail(email)
                 .orElseThrow(() -> new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST));
     }
 

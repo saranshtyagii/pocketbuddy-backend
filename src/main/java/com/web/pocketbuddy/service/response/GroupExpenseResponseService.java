@@ -14,6 +14,7 @@ import com.web.pocketbuddy.service.GroupExpenseService;
 import com.web.pocketbuddy.service.mapper.MapperUtils;
 import com.web.pocketbuddy.utils.ConfigService;
 import lombok.AllArgsConstructor;
+import org.apache.catalina.mapper.Mapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -61,8 +62,19 @@ public class GroupExpenseResponseService implements GroupExpenseService {
 
 
     @Override
-    public GroupExpenseDto updateExpense(RegisterGroupExpense expensePayload) {
-        return null;
+    public GroupExpenseDto updateExpense(GroupExpenseDto expenseDto) {
+        GroupExpenseDocument savedExpense = findByExpenseId(expenseDto.getExpenseId());
+
+        savedExpense.setExpenseDescription(expenseDto.getDescription());
+        savedExpense.setExpenseAmount(expenseDto.getAmount());
+        savedExpense.setIncludedMembers(expenseDto.getIncludedMembers());
+
+        return MapperUtils.convertToGroupExpenseDto(groupExpenseMasterDao.save(savedExpense));
+    }
+
+    private GroupExpenseDocument findByExpenseId(String expenseId) {
+        return groupExpenseMasterDao.findByExpenseId(expenseId)
+                .orElseThrow(() -> new GroupApiExceptions("No Expense Found!", HttpStatus.NOT_FOUND));
     }
 
     @Override

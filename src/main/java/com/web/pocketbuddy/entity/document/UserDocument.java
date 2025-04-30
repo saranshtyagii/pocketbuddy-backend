@@ -26,43 +26,51 @@ public class UserDocument {
 
     @Id
     private String userId;
+
+    // === User Identity ===
     @NotNull
     private String userFirstName;
     private String userLastName;
-    private String mobileNumber;
 
-    @NotNull
-    private String username;
     @Email
     private String email;
-    
-    private String password;
+    private String mobileNumber;
     private Boolean loginWithMobile;
 
+    // === Security & Authentication ===
+    private String password;
+    private String oneTimePassword;
+    private String emailVerificationToken;
+    private String changePasswordToken;
+    private boolean isEmailVerified = false;
+    private boolean isPhoneVerified = false;
+
+    // === Timestamps ===
     @CreatedDate
     private Date createdDate;
     @LastModifiedDate
     private Date lastUpdatedDate;
 
-    private String oneTimePassword;
-    private String emailVerificationToken;
-    private String changePasswordToken;
-
-    private boolean subscribeEmailNotification = true;
-
+    // === Login Tracking ===
     private Date lastLoginDate;
     private String lastLoginIp;
     private String lastLoginDevice;
+    private Map<String, DeviceDetail> listOfLoginDevices;
+
+    // === Current Device Info ===
     private String currentModelName;
     private String currentModelVersion;
     private String currentOsVersion;
     private String currentAppVersion;
 
-    // Id - token || value - Device Detail (Device Id - Model Name)
-    Map<String, DeviceDetail> listOfLoginDevices;
+    // === Notification Preferences ===
+    private boolean subscribeEmailNotification = true;
 
+    // === Group Membership ===
     private List<String> userJoinGroupId;
+    private boolean showGroupExpenseInPersonalExpenseList = false;
 
+    // === Financial Data ===
     private double userMonthlyBudget;
     private double userMonthlyExpense;
     private double userMonthlyIncome;
@@ -70,9 +78,4 @@ public class UserDocument {
     private double userYearlyBudget;
     private double userYearlyExpense;
     private double userYearlyIncome;
-
-    private boolean showGroupExpenseInPersonalExpenseList = false;
-
-    private boolean isEmailVerified = false;
-    private boolean isPhoneVerified = false;
 }

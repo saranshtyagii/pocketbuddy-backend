@@ -13,9 +13,9 @@ public class UserDetailResponse {
     private String userId;
     private String userFirstName;
     private String userLastName;
-    private String username;
     private String email;
     private String mobileNumber;
+    private boolean emailVerified;
 
     private double userMonthlyBudget;
     private double userMonthlyExpense;

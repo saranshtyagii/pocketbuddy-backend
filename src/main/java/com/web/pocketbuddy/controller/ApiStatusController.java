@@ -48,7 +48,6 @@ public class ApiStatusController {
                     .userId(UUID.randomUUID().toString())
                     .userFirstName("Checking")
                     .userLastName("Database")
-                    .username("checking_database_status")
                     .email("demo@example.com")
                     .password("pocketbuddy@123")
                     .createdDate(new Date())

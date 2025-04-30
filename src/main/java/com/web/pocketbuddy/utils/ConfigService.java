@@ -79,7 +79,6 @@ public class ConfigService {
 					RegisterUser.builder()
 							.userFirstName("Pocket")
 							.userLastName("Buddy")
-							.username("pocketbuddy")
 							.email("contact@pocketbuddy.app")
 							.mobileNumber("0000000000")
 							.password("pocketbuddy@123")
