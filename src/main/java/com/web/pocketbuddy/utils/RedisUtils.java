@@ -10,6 +10,10 @@ public class RedisUtils {
 
     private final RedisServices redisServices;
 
+    public static final String EMAIL_VERIFICATION_TOKEN_KEY = "pocket_buddy_email_verification_!";
+    public static final String PASSWORD_VERIFICATION_TOKEN_KEY = "pocket_buddy_email_verification_!";
+    public static final String OTP_VERIFICATION_KEY = "pocket_buddy_otp_verification_!";
+
     public void set(String key, String value) {
         if(StringUtils.isEmpty(key) || StringUtils.isEmpty(value)) {
             throw new IllegalArgumentException("key or value is empty");

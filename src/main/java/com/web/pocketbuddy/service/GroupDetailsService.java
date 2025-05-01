@@ -6,6 +6,7 @@ import com.web.pocketbuddy.entity.document.GroupDocument;
 import com.web.pocketbuddy.payload.GroupRegisterDetails;
 
 import java.util.List;
+import java.util.Map;
 
 public interface GroupDetailsService {
 
@@ -23,4 +24,6 @@ public interface GroupDetailsService {
     public GroupDocument findGroupDocumentById(String groupId);
 
     void saveOrUpdate(GroupDocument savedGroup);
+
+    Map<String, String> fetchGroupJoinMembers(String groupId);
 }

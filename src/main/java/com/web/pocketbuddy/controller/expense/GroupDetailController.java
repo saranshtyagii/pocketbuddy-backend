@@ -10,44 +10,50 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(UrlsConstants.GROUP_URL)
 @AllArgsConstructor
 public class GroupDetailController {
 
-    private final GroupDetailsService groupExpenseService;
+    private final GroupDetailsService groupDetailsService;
 
     // Group Related Service
 
     @PostMapping("/new-group")
     public ResponseEntity<GroupDetailsResponse> registerGroup(@RequestBody GroupRegisterDetails registerDetails) {
-        return new ResponseEntity<>(groupExpenseService.registerGroup(registerDetails), HttpStatus.OK);
+        return new ResponseEntity<>(groupDetailsService.registerGroup(registerDetails), HttpStatus.OK);
     }
 
     @PatchMapping("/join-group")
     public ResponseEntity<GroupDetailsResponse> joinGroup(@RequestParam String groupId, @RequestParam String userId) {
-        return ResponseEntity.ok(groupExpenseService.joinGroup(groupId, userId));
+        return ResponseEntity.ok(groupDetailsService.joinGroup(groupId, userId));
     }
 
     @GetMapping("/find")
     public ResponseEntity<GroupDetailsResponse> findGroup(@RequestParam String groupId) {
-        return ResponseEntity.ok(groupExpenseService.findGroupById(groupId));
+        return ResponseEntity.ok(groupDetailsService.findGroupById(groupId));
     }
 
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteGroup(@RequestParam String groupId, @RequestParam String userId) {
-        return ResponseEntity.ok(groupExpenseService.deleteGroup(groupId, userId));
+        return ResponseEntity.ok(groupDetailsService.deleteGroup(groupId, userId));
     }
 
     @GetMapping("/remove-groups")
     public ResponseEntity<String> removeGroup(@RequestParam String apiKey) {
-        return ResponseEntity.ok(groupExpenseService.deleteGroupFromDb(apiKey, null));
+        return ResponseEntity.ok(groupDetailsService.deleteGroupFromDb(apiKey, null));
     }
 
     @GetMapping("/find-user-joined-groups")
     public ResponseEntity<List<GroupDetailsResponse>> findUserJoinedGroups(@RequestParam String userId) {
-        return ResponseEntity.ok(groupExpenseService.getAllGroups(userId));
+        return ResponseEntity.ok(groupDetailsService.getAllGroups(userId));
+    }
+
+    @GetMapping("/find-members")
+    public ResponseEntity<Map<String, String>> findMembers(@RequestParam String groupId) {
+        return ResponseEntity.ok(groupDetailsService.fetchGroupJoinMembers(groupId));
     }
 
 }

@@ -39,8 +39,8 @@ public class UserDocument {
 
     // === Security & Authentication ===
     private String password;
-    private String oneTimePassword;
-    private String emailVerificationToken;
+//    private String oneTimePassword;
+//    private String emailVerificationToken;
     private String changePasswordToken;
     private boolean isEmailVerified = false;
     private boolean isPhoneVerified = false;

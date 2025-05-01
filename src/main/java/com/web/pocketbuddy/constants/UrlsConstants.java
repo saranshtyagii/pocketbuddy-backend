@@ -4,7 +4,7 @@ public class UrlsConstants {
 
     private UrlsConstants() {}
 
-    public static final String HOST_HTTP_BASE_URL = "http://172.20.10.6:8069";
+    public static final String HOST_HTTP_BASE_URL = "http://192.168.1.103:8069";
     public static final String HOST_URL = "/pocketbuddy";
     public static final String BASE_URL_V1 = HOST_URL + "/api/v1";
 

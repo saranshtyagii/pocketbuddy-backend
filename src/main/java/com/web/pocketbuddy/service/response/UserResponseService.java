@@ -15,6 +15,7 @@ import com.web.pocketbuddy.service.UserService;
 import com.web.pocketbuddy.service.mapper.MapperUtils;
 import com.web.pocketbuddy.service.notification.NotificationService;
 import com.web.pocketbuddy.utils.RedisServices;
+import com.web.pocketbuddy.utils.RedisUtils;
 import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -54,7 +55,8 @@ public class UserResponseService implements UserService {
         requestedUser.setPassword(passwordEncoder.encode(registerUser.getPassword()));
 
         String token = GenerateUtils.generateToken();
-        requestedUser.setEmailVerificationToken(token);
+        String key = RedisUtils.EMAIL_VERIFICATION_TOKEN_KEY + token;
+        redisServices.set(key, registerUser.getEmail(), 60 * 5);
 
         UserDocument savedUser = userMasterDoa.save(requestedUser);
 
@@ -119,7 +121,9 @@ public class UserResponseService implements UserService {
         userDocument.setLoginWithMobile(true);
         userDocument.setPassword(passwordEncoder.encode("pocketbuddy_"+mobileNumber+"_password"));
         String otp = GenerateUtils.generateOtp(mobileNumber);
-        userDocument.setOneTimePassword(otp);
+
+        String key = RedisUtils.OTP_VERIFICATION_KEY + mobileNumber;
+        redisServices.set(key, otp, 60 * 5);
 
         userMasterDoa.save(userDocument);
         resendOneTimePasswordForMobile(mobileNumber, otp);
@@ -232,7 +236,7 @@ public class UserResponseService implements UserService {
     @Override
     public String updateMobileNumber(String mobileNumber, String email) {
         UserDocument savedUser = fetchUserByEmail(email);
-        savedUser.setOneTimePassword(GenerateUtils.generateOtp(email));
+//        savedUser.setOneTimePassword(GenerateUtils.generateOtp(email));
         userMasterDoa.save(savedUser);
         return ConstantsVariables.OTP_SEND_MESSAGE + maskedString(savedUser.getMobileNumber(), false);
     }
@@ -251,12 +255,20 @@ public class UserResponseService implements UserService {
 
     @Override
     public String verifyEmailWithToken(String token) {
-        UserDocument savedDocument = userMasterDoa.findByEmailVerificationToken(token).orElseThrow(() -> new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST));
+        String key = RedisUtils.EMAIL_VERIFICATION_TOKEN_KEY + token;
+        String value;
+        try {
+            value = redisServices.get(key);
+            redisServices.delete(key);
+            if(value == null) throw new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            throw new UserApiException("Something went wrong while verifying email token", HttpStatus.BAD_REQUEST);
+        }
+        UserDocument savedDocument = fetchUserByEmail(value);
         if(savedDocument.isEmailVerified()) {
             throw new UserApiException("Email already verified", HttpStatus.BAD_REQUEST);
         }
         savedDocument.setEmailVerified(true);
-        savedDocument.setEmailVerificationToken(null);
         userMasterDoa.save(savedDocument);
         return savedDocument.getEmail();
     }

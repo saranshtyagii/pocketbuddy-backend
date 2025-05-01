@@ -194,6 +194,20 @@ public class GroupDetailsResponseService implements GroupDetailsService {
         groupDetailsMasterDoa.save(savedGroup);
     }
 
+    @Override
+    public Map<String, String> fetchGroupJoinMembers(String groupId) {
+        GroupDocument savedGroup = fetchGroupById(groupId);
+        if(savedGroup.isDeleted()) {
+            return Collections.emptyMap();
+        }
+        Map<String, String> userIdOrName = new HashMap<>();
+        savedGroup.getMembers().forEach((id, amount) -> {
+            UserDocument userDocument = userService.findUserById(id);
+            userIdOrName.put(id, userDocument.getUserFirstName()+" "+userDocument.getUserLastName());
+        });
+        return userIdOrName;
+    }
+
 
     private GroupDocument fetchGroupById(String groupId) {
         return groupDetailsMasterDoa.findByGroupId(groupId)
