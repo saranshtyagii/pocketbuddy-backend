@@ -192,7 +192,7 @@ public class MapperUtils {
                 .groupId(expensePayload.getGroupId())
                 .expenseDescription(expensePayload.getDescription())
                 .expenseAmount(expensePayload.getAmount())
-                .includedMembers(expensePayload.getIncludedMembers())
+
                 .registerByUserId(expensePayload.getRegisterByUserId())
                 .isUpdated(false)
                 .isDeleted(false)

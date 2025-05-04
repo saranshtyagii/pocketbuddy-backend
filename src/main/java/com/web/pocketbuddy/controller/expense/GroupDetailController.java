@@ -26,7 +26,7 @@ public class GroupDetailController {
         return new ResponseEntity<>(groupDetailsService.registerGroup(registerDetails), HttpStatus.OK);
     }
 
-    @PatchMapping("/join-group")
+    @GetMapping("/join-group")
     public ResponseEntity<GroupDetailsResponse> joinGroup(@RequestParam String groupId, @RequestParam String userId) {
         return ResponseEntity.ok(groupDetailsService.joinGroup(groupId, userId));
     }

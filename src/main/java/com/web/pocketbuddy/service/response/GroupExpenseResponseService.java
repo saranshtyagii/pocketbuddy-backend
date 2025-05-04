@@ -1,20 +1,20 @@
 package com.web.pocketbuddy.service.response;
 
 import com.web.pocketbuddy.dto.GroupExpenseDto;
-import com.web.pocketbuddy.dto.PersonalExpenseResponse;
 import com.web.pocketbuddy.entity.dao.GroupExpenseMasterDao;
 import com.web.pocketbuddy.entity.document.GroupDocument;
 import com.web.pocketbuddy.entity.document.GroupExpenseDocument;
+import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.entity.helper.GroupExpenseMetaData;
 import com.web.pocketbuddy.exception.GroupApiExceptions;
 import com.web.pocketbuddy.payload.FindExpenseByDates;
 import com.web.pocketbuddy.payload.RegisterGroupExpense;
 import com.web.pocketbuddy.service.GroupDetailsService;
 import com.web.pocketbuddy.service.GroupExpenseService;
+import com.web.pocketbuddy.service.UserService;
 import com.web.pocketbuddy.service.mapper.MapperUtils;
 import com.web.pocketbuddy.utils.ConfigService;
 import lombok.AllArgsConstructor;
-import org.apache.catalina.mapper.Mapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -29,12 +29,22 @@ public class GroupExpenseResponseService implements GroupExpenseService {
 
     private final GroupDetailsService groupDetailsService;
     private final GroupExpenseMasterDao groupExpenseMasterDao;
+    private final UserService userService;
 
 
     @Override
     public GroupExpenseDto addExpense(RegisterGroupExpense expensePayload) {
         GroupDocument savedGroup = groupDetailsService.findGroupDocumentById(expensePayload.getGroupId());
         GroupExpenseDocument request = MapperUtils.convertToGroupExpenseDocument(expensePayload);
+
+        Map<String, Double> includingMembersMap = expensePayload.getIncludedMembers();
+        Map<String, GroupExpenseMetaData> map = new HashMap<>();
+        includingMembersMap.forEach((userId, amount) -> {
+            UserDocument userDocument = userService.findUserById(userId);
+            String fullname = userDocument.getUserFirstName() +" "+userDocument.getUserLastName();
+            map.put(userId, new GroupExpenseMetaData(fullname, amount));
+        });
+        request.setIncludedMembers(map);
 
         // Get existing member expenses or initialize a new one
         Map<String, Double> groupExpenses = savedGroup.getMembers();

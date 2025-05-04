@@ -99,8 +99,8 @@ public class ConfigService {
 					.createdByUser(savedUser.getUserId())
 					.build());
 
-			Map<String, GroupExpenseMetaData> includedMembers = new HashMap<>();
-			includedMembers.put(savedUser.getUserId(), new GroupExpenseMetaData(savedUser.getUserFirstName(), 10.0));
+			Map<String, Double> includedMembers = new HashMap<>();
+			includedMembers.put(savedUser.getUserId(), 10.0);
 
 			GroupExpenseDto savedGroupExpense = groupExpenseService.addExpense(
 					RegisterGroupExpense.builder()

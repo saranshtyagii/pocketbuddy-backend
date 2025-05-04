@@ -20,6 +20,6 @@ public class RegisterGroupExpense {
 
     private String registerByUserId;
 
-    private Map<String , GroupExpenseMetaData> includedMembers;
+    private Map<String , Double> includedMembers;
 
 }

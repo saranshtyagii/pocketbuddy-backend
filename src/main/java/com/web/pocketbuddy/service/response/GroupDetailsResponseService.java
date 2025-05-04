@@ -83,13 +83,14 @@ public class GroupDetailsResponseService implements GroupDetailsService {
 
         // fetch saved user
         UserDocument savedUser = userService.findUserById(userId);
-
         // check for join groups
         List<String> joinedGroupIds = savedUser.getUserJoinGroupId();
         if(CollectionUtils.isEmpty(joinedGroupIds)) {
             joinedGroupIds = new ArrayList<>();
         }
-
+        if(!CollectionUtils.isEmpty(joinedGroupIds) && joinedGroupIds.contains(savedGroup.getGroupId())) {
+            throw new GroupApiExceptions("You already a member of this Group", HttpStatus.BAD_REQUEST);
+        }
         joinedGroupIds.add(savedGroup.getGroupId());
         savedUser.setUserJoinGroupId(joinedGroupIds);
         userService.savedUpdatedUser(savedUser);
@@ -103,7 +104,7 @@ public class GroupDetailsResponseService implements GroupDetailsService {
         savedGroup.setMembers(members);
         GroupDocument updatedGroup = groupDetailsMasterDoa.save(savedGroup);
 
-        GroupDetailsResponse groupDetailsResponse = new GroupDetailsResponse();
+        GroupDetailsResponse groupDetailsResponse = MapperUtils.convertGroupDetailResponse(updatedGroup);
 
         // change userId with username name
         Map<String, Double> groupMembers = new HashMap<>();
@@ -112,6 +113,7 @@ public class GroupDetailsResponseService implements GroupDetailsService {
             groupMembers.put(userDocument.getUserFirstName(), amount);
         });
         groupDetailsResponse.setJoinedMembers(groupMembers);
+
         return groupDetailsResponse;
     }
 
