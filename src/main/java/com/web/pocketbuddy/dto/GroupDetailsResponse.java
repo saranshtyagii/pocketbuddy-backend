@@ -15,6 +15,7 @@ import java.util.Map;
 public class GroupDetailsResponse {
 
     private String groupId;
+    private String discoverableId;
     private String groupName;
     private String groupDescription;
 

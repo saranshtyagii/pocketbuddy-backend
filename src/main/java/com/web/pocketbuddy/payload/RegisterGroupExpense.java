@@ -16,7 +16,7 @@ public class RegisterGroupExpense {
 
     private String groupId;
     private String description;
-    private double amount;
+    private Double amount;
 
     private String registerByUserId;
 

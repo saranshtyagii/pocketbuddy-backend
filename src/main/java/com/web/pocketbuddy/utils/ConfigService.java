@@ -106,7 +106,7 @@ public class ConfigService {
 					RegisterGroupExpense.builder()
 							.groupId(savedGroup.getGroupId())
 							.description("Validation Pocket Buddy.")
-							.amount(10)
+							.amount(10.0)
 							.includedMembers(includedMembers)
 							.build()
 			);

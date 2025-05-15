@@ -1,5 +1,6 @@
 package com.web.pocketbuddy;
 
+import com.web.pocketbuddy.constants.UrlsConstants;
 import com.web.pocketbuddy.utils.GenerateUtils;
 import com.web.pocketbuddy.utils.RedisUtils;
 import jakarta.annotation.PostConstruct;

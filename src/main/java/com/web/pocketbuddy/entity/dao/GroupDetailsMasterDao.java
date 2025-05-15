@@ -7,4 +7,6 @@ import java.util.Optional;
 
 public interface GroupDetailsMasterDao extends MongoRepository<GroupDocument, String> {
     Optional<GroupDocument> findByGroupId(String groupId);
+
+    boolean existsByGroupDiscoverableId(String groupDiscoverableId);
 }

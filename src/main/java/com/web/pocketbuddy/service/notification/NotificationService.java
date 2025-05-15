@@ -5,6 +5,7 @@ import io.micrometer.common.util.StringUtils;
 import io.micrometer.core.instrument.util.IOUtils;
 import jakarta.mail.internet.MimeMessage;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -16,10 +17,10 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 @Service
-@AllArgsConstructor
 public class NotificationService {
 
-    private final JavaMailSender mailSender;
+    @Autowired
+    private JavaMailSender mailSender;
 
     @Async
     public void sendEmail(String to, String subject, String templateName, String replaceKey, String replaceValue) {

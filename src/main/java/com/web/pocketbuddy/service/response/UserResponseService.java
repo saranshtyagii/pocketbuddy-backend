@@ -54,20 +54,24 @@ public class UserResponseService implements UserService {
         }
         requestedUser.setPassword(passwordEncoder.encode(registerUser.getPassword()));
 
-        String token = GenerateUtils.generateToken();
-        String key = RedisUtils.EMAIL_VERIFICATION_TOKEN_KEY + token;
-        redisServices.set(key, registerUser.getEmail(), 60 * 5);
-
         UserDocument savedUser = userMasterDoa.save(requestedUser);
 
-        String emailVerificationUrl = buildEmailVerificationUrl(token);
+        String emailVerificationUrl = buildEmailVerificationUrl(savedUser.getEmail());
         notificationService.sendEmail(savedUser.getEmail(), "Verify Email Address", NotificationTemplate.EMAIL_VERIFICATION, NotificationTemplate.EMAIL_VALUE_REPLACE_KEY, emailVerificationUrl);
 
         return MapperUtils.toUserDetailResponse(savedUser);
     }
 
-    private String buildEmailVerificationUrl(String token) {
-        return UrlsConstants.HOST_HTTP_BASE_URL + UrlsConstants.AUTH_URL + "/verify/email?token=" + token;
+    private String buildEmailVerificationUrl(String email) {
+
+        String previousToken = redisServices.get(email);
+        if(StringUtils.isEmpty(previousToken)) {
+            String token = GenerateUtils.generateToken();
+            String key = RedisUtils.EMAIL_VERIFICATION_TOKEN_KEY + token;
+            redisServices.set(key, email, 60 * 5);
+            previousToken = token;
+        }
+        return UrlsConstants.HOST_HTTP_BASE_URL + UrlsConstants.AUTH_URL + "/verify/email?token=" + previousToken;
     }
 
     @Override
@@ -251,6 +255,17 @@ public class UserResponseService implements UserService {
     public boolean isEmailVerified(String email) {
         UserDocument userDocument = fetchUserByEmail(email);
         return userDocument.isEmailVerified();
+    }
+
+    @Override
+    public String sendEmailVerificationLink(String email) {
+        UserDocument savedUser = fetchUserByEmail(email);
+        if(savedUser.isEmailVerified()) {
+            throw new UserApiException("Your are already verified", HttpStatus.BAD_REQUEST);
+        }
+        String emailVerificationUrl = buildEmailVerificationUrl(savedUser.getEmail());
+        notificationService.sendEmail(savedUser.getEmail(), "Verify Email Address", NotificationTemplate.EMAIL_VERIFICATION, NotificationTemplate.EMAIL_VALUE_REPLACE_KEY, emailVerificationUrl);
+        return "Verification link has been sent";
     }
 
     @Override

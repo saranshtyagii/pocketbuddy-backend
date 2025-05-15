@@ -10,10 +10,12 @@ import com.web.pocketbuddy.service.GroupDetailsService;
 import com.web.pocketbuddy.service.UserService;
 import com.web.pocketbuddy.service.mapper.MapperUtils;
 import com.web.pocketbuddy.utils.ConfigService;
+import com.web.pocketbuddy.utils.GenerateUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -33,9 +35,16 @@ public class GroupDetailsResponseService implements GroupDetailsService {
         // fetch Saved User details
         UserDocument savedUser = userService.findUserById(registerDetails.getCreatedByUser());
 
+        // create discoverable Id
+        String discoverableId = GenerateUtils.generateGroupDiscoverableId();
+        while(existsGroupByDiscoverableId(discoverableId)) {
+            discoverableId = GenerateUtils.generateGroupDiscoverableId();
+        }
+        createGroupDocument.setGroupDiscoverableId(discoverableId);
+
         // checkout for joined groupDetails
         List<String> joinedGroupIds = savedUser.getUserJoinGroupId();
-        if(CollectionUtils.isEmpty(joinedGroupIds)) {
+        if (CollectionUtils.isEmpty(joinedGroupIds)) {
             joinedGroupIds = new ArrayList<>();
         }
         Map<String, Double> members = new HashMap<>();
@@ -67,7 +76,7 @@ public class GroupDetailsResponseService implements GroupDetailsService {
     public String deleteGroup(String groupId, String userId) {
         GroupDocument savedGroup = fetchGroupById(groupId);
 
-        if(!savedGroup.getCreatedByUser().equals(userId)) {
+        if (!savedGroup.getCreatedByUser().equals(userId)) {
             throw new GroupApiExceptions("You are not group admin", HttpStatus.FORBIDDEN);
         }
 
@@ -85,10 +94,10 @@ public class GroupDetailsResponseService implements GroupDetailsService {
         UserDocument savedUser = userService.findUserById(userId);
         // check for join groups
         List<String> joinedGroupIds = savedUser.getUserJoinGroupId();
-        if(CollectionUtils.isEmpty(joinedGroupIds)) {
+        if (CollectionUtils.isEmpty(joinedGroupIds)) {
             joinedGroupIds = new ArrayList<>();
         }
-        if(!CollectionUtils.isEmpty(joinedGroupIds) && joinedGroupIds.contains(savedGroup.getGroupId())) {
+        if (!CollectionUtils.isEmpty(joinedGroupIds) && joinedGroupIds.contains(savedGroup.getGroupId())) {
             throw new GroupApiExceptions("You already a member of this Group", HttpStatus.BAD_REQUEST);
         }
         joinedGroupIds.add(savedGroup.getGroupId());
@@ -97,7 +106,7 @@ public class GroupDetailsResponseService implements GroupDetailsService {
 
         // add user as group members
         Map<String, Double> members = savedGroup.getMembers();
-        if(CollectionUtils.isEmpty(members)) {
+        if (CollectionUtils.isEmpty(members)) {
             members = new HashMap<>();
         }
         members.put(savedUser.getUserId(), 0.0);
@@ -119,11 +128,11 @@ public class GroupDetailsResponseService implements GroupDetailsService {
 
     @Override
     public void deleteFromDb(String groupId, String apiKey) {
-        if(!apiKey.equals(ConfigService.getConfig().getApiKey())) {
+        if (!apiKey.equals(ConfigService.getConfig().getApiKey())) {
             throw new GroupApiExceptions("Invalid Api Key", HttpStatus.FORBIDDEN);
         }
 
-        if(org.apache.commons.lang3.StringUtils.isNotBlank(groupId)) {
+        if (org.apache.commons.lang3.StringUtils.isNotBlank(groupId)) {
             groupDetailsMasterDoa.deleteById(groupId);
             return;
         }
@@ -131,7 +140,7 @@ public class GroupDetailsResponseService implements GroupDetailsService {
         List<GroupDocument> savedGroup = groupDetailsMasterDoa.findAll();
 
         savedGroup.parallelStream().forEach(group -> {
-            if(group.isDeleted()) {
+            if (group.isDeleted()) {
                 groupDetailsMasterDoa.delete(group);
             }
         });
@@ -143,14 +152,14 @@ public class GroupDetailsResponseService implements GroupDetailsService {
 
         // fetch joined Group Document id
         List<String> joinedGroupIds = userDocument.getUserJoinGroupId();
-        if(CollectionUtils.isEmpty(joinedGroupIds)) {
+        if (CollectionUtils.isEmpty(joinedGroupIds)) {
             return Collections.emptyList();
         }
 
         List<GroupDetailsResponse> joinedGroups = new ArrayList<>();
-        joinedGroupIds.forEach(groupId-> {
-            GroupDocument savedGroup = fetchGroupById(groupId);
-            if(!savedGroup.isDeleted()) {
+        joinedGroupIds.forEach(groupId -> {
+            GroupDocument savedGroup = fetchGroupById(groupId, false);
+            if (!ObjectUtils.isEmpty(savedGroup) && !savedGroup.isDeleted() && !StringUtils.isEmpty(savedGroup.getGroupDiscoverableId())) {
                 joinedGroups.add(MapperUtils.convertGroupDetailResponse(savedGroup));
             }
         });
@@ -166,11 +175,11 @@ public class GroupDetailsResponseService implements GroupDetailsService {
     @Override
     public String deleteGroupFromDb(String apiKey, String groupId) {
 
-        if(StringUtils.isEmpty(groupId) && !apiKey.equals(ConfigService.getConfig().getApiKey())) {
+        if (StringUtils.isEmpty(groupId) && !apiKey.equals(ConfigService.getConfig().getApiKey())) {
             throw new GroupApiExceptions("Its not that easy my friend :-)", HttpStatus.FORBIDDEN);
         }
 
-        if(!StringUtils.isEmpty(groupId)) {
+        if (!StringUtils.isEmpty(groupId)) {
             groupDetailsMasterDoa.delete(fetchGroupById(groupId));
             return "Group " + groupId + " has been deleted";
         }
@@ -178,7 +187,7 @@ public class GroupDetailsResponseService implements GroupDetailsService {
         List<GroupDocument> allGroups = groupDetailsMasterDoa.findAll();
         AtomicInteger count = new AtomicInteger(1);
         allGroups.forEach(group -> {
-            if(group.isDeleted()) {
+            if (group.isDeleted()) {
                 groupDetailsMasterDoa.deleteById(groupId);
                 count.addAndGet(1);
             }
@@ -199,13 +208,13 @@ public class GroupDetailsResponseService implements GroupDetailsService {
     @Override
     public Map<String, String> fetchGroupJoinMembers(String groupId) {
         GroupDocument savedGroup = fetchGroupById(groupId);
-        if(savedGroup.isDeleted()) {
+        if (savedGroup.isDeleted()) {
             return Collections.emptyMap();
         }
         Map<String, String> userIdOrName = new HashMap<>();
         savedGroup.getMembers().forEach((id, amount) -> {
             UserDocument userDocument = userService.findUserById(id);
-            userIdOrName.put(id, userDocument.getUserFirstName()+" "+userDocument.getUserLastName());
+            userIdOrName.put(id, userDocument.getUserFirstName() + " " + userDocument.getUserLastName());
         });
         return userIdOrName;
     }
@@ -214,6 +223,19 @@ public class GroupDetailsResponseService implements GroupDetailsService {
     private GroupDocument fetchGroupById(String groupId) {
         return groupDetailsMasterDoa.findByGroupId(groupId)
                 .orElseThrow(() -> new GroupApiExceptions("No such group found!", HttpStatus.NOT_FOUND));
+    }
+
+    private GroupDocument fetchGroupById(String groupId, boolean throwException) {
+        if (throwException) {
+            return groupDetailsMasterDoa.findByGroupId(groupId)
+                    .orElseThrow(() -> new GroupApiExceptions("No such group found!", HttpStatus.NOT_FOUND));
+        }
+        return groupDetailsMasterDoa.findByGroupId(groupId)
+                .orElse(null);
+    }
+
+    private boolean existsGroupByDiscoverableId(String discoverableId) {
+        return groupDetailsMasterDoa.existsByGroupDiscoverableId(discoverableId);
     }
 
 }

@@ -1,6 +1,9 @@
-package com.web.pocketbuddy.controller;
+package com.web.pocketbuddy.controller.validate;
 
 import com.web.pocketbuddy.constants.UrlsConstants;
+import com.web.pocketbuddy.entity.dao.GroupDetailsMasterDao;
+import com.web.pocketbuddy.entity.dao.GroupExpenseMasterDao;
+import com.web.pocketbuddy.entity.dao.PersonalExpenseMasterDao;
 import com.web.pocketbuddy.entity.dao.UserMasterDao;
 import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.exception.UserApiException;
@@ -28,12 +31,15 @@ import java.util.UUID;
 public class ApiStatusController {
 
     private final UserMasterDao userMasterDoa;
+    private final GroupDetailsMasterDao groupDetailsMasterDao;
+    private final GroupExpenseMasterDao groupExpenseMasterDao;
+    private final PersonalExpenseMasterDao personalExpenseMasterDao;
     private final ConfigService configService;
 
     @GetMapping("/health")
     public ResponseEntity<String> checkActiveStatus(@RequestParam String apiKey) {
         if(checkApiKey(apiKey)) {
-            return ResponseEntity.badRequest().body("It's not that easy my friend :D");
+            return ResponseEntity.badRequest().body("It's not that easy my friend :D:");
         }
         return new ResponseEntity<>("Pocket Buddy is live on - https://www.nexlogix.com" + UrlsConstants.HOST_URL, HttpStatus.OK);
     }
@@ -67,24 +73,29 @@ public class ApiStatusController {
     }
 
     @GetMapping("/fetchdb")
-    public ResponseEntity<List<UserDocument>> fetchDatabase(@RequestParam String apiKey, @RequestParam String password) {
-        if(checkApiKey(apiKey)) {
+    public ResponseEntity<List<?>> fetchDatabase(@RequestParam String apiKey, @RequestParam String password, String collectionName) {
+        if(checkApiKey(apiKey) || checkAdminPassword(password)) {
             throw new UserApiException("It's not that easy my friend :D", HttpStatus.FORBIDDEN);
         }
-        if(!"pocketbuddy@example.com".equals(password)) {
-            throw new UserApiException("It's not that easy my friend :D", HttpStatus.FORBIDDEN);
-        }
-        return new ResponseEntity<>(userMasterDoa.findAll(), HttpStatus.OK);
 
+        switch (collectionName) {
+            case "users":
+                return new ResponseEntity<>(userMasterDoa.findAll(), HttpStatus.OK);
+            case "groups":
+                return new ResponseEntity<>(groupDetailsMasterDao.findAll(), HttpStatus.OK);
+            case "group-expenses":
+                return new ResponseEntity<>(groupExpenseMasterDao.findAll(), HttpStatus.OK);
+            case "personal-expenses":
+                return new ResponseEntity<>(personalExpenseMasterDao.findAll(), HttpStatus.OK);
+            default:
+                throw new UserApiException("No such collection found!", HttpStatus.BAD_REQUEST);
+        }
     }
 
     @GetMapping("/remove-id")
     public ResponseEntity<String> removeId(@RequestParam String apiKey, @RequestParam String password, @RequestParam String userId) {
-        if(checkApiKey(apiKey)) {
+        if(checkApiKey(apiKey) || checkAdminPassword(password)) {
             return ResponseEntity.badRequest().body("It's not that easy my friend :D");
-        }
-        if(!"pocketbuddy@example.com".equals(password)) {
-            throw new UserApiException("It's not that easy my friend :D", HttpStatus.FORBIDDEN);
         }
         UserDocument userDocument = userMasterDoa.findById(userId).orElse(null);
         if(ObjectUtils.isEmpty(userDocument)) {
@@ -97,19 +108,12 @@ public class ApiStatusController {
     @GetMapping("/config")
     private ResponseEntity<String> fetchServerConfig(@RequestParam String apiKey, @RequestParam String password) {
         System.err.println("Config api call");
-        if(checkApiKey(apiKey)) {
+        if(checkApiKey(apiKey) || checkAdminPassword(password)) {
             return ResponseEntity.badRequest().body("It's not that easy my friend :D");
-        }
-        if(!"pocketbuddy@example.com".equals(password)) {
-            throw new UserApiException("It's not that easy my friend :D", HttpStatus.FORBIDDEN);
         }
 
         return new ResponseEntity<>(MapperUtils.convertObjectToString(ConfigService.getInstance()), HttpStatus.OK);
 
-    }
-
-    private boolean checkApiKey(String apiKey) {
-        return !apiKey.equals(ConfigService.getConfig().getApiKey());
     }
 
     @GetMapping("/refresh-config")
@@ -125,6 +129,14 @@ public class ApiStatusController {
 
         configService.refreshConfig();
         return ResponseEntity.ok("Config refreshed successfully.");
+    }
+
+    private boolean checkApiKey(String apiKey) {
+        return !apiKey.equals(ConfigService.getConfig().getApiKey());
+    }
+
+    private boolean checkAdminPassword(String password) {
+        return !password.equals(ConfigService.getConfig().getAdminPassword());
     }
 
 }

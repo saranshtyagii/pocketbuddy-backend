@@ -1,10 +1,14 @@
 package com.web.pocketbuddy.constants;
 
+import org.springframework.beans.factory.annotation.Value;
+
 public class UrlsConstants {
 
     private UrlsConstants() {}
 
-    public static final String HOST_HTTP_BASE_URL = "http://192.168.29.152:8069";
+    @Value("server.port")
+    private static String port;
+    public static final String HOST_HTTP_BASE_URL = "http://192.168.1.4:"+port;
     public static final String HOST_URL = "/pocketbuddy";
     public static final String BASE_URL_V1 = HOST_URL + "/api/v1";
 

@@ -29,4 +29,18 @@ public class GenerateUtils {
     public static String generateToken() {
         return UUID.randomUUID().toString();
     }
+
+    public static String generateGroupDiscoverableId() {
+        final String BASE62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        String uuid = UUID.randomUUID().toString().replace("-", "");
+        long hash = uuid.hashCode() & 0xFFFFFFFFL; // Convert to unsigned
+        StringBuilder shortId = new StringBuilder();
+        // Convert hash to base62
+        while (shortId.length() < 6) {
+            shortId.append(BASE62.charAt((int)(hash % 62)));
+            hash /= 62;
+        }
+        return shortId.reverse().toString();
+    }
+
 }

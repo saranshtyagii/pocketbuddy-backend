@@ -84,6 +84,11 @@ public class AuthenticationController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/re-verify/email")
+    public ResponseEntity<String> reVerifyEmail(@RequestParam String email) {
+        return ResponseEntity.ok(userService.sendEmailVerificationLink(email));
+    }
+
     @GetMapping("/verify/email")
     public ResponseEntity<Void> verifyEmail(@RequestParam String token) {
         String email = userService.verifyEmailWithToken(token);

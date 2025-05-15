@@ -4,11 +4,13 @@ import com.web.pocketbuddy.constants.UrlsConstants;
 import com.web.pocketbuddy.dto.GroupExpenseDto;
 import com.web.pocketbuddy.payload.RegisterGroupExpense;
 import com.web.pocketbuddy.service.GroupExpenseService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@RestController
 @RequestMapping(UrlsConstants.GROUP_EXPENSE_URL)
 public class GroupExpenseController {
 
@@ -25,6 +27,12 @@ public class GroupExpenseController {
 
     @PostMapping("/register")
     public ResponseEntity<GroupExpenseDto> registerGroupExpense(@RequestBody RegisterGroupExpense request) {
-        return ResponseEntity.ok(groupExpenseService.addExpense(request));
+        try {
+            GroupExpenseDto result = groupExpenseService.addExpense(request);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
     }
 }

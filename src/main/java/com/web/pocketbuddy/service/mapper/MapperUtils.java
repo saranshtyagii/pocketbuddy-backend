@@ -105,6 +105,7 @@ public class MapperUtils {
     public static GroupDetailsResponse convertGroupDetailResponse(GroupDocument savedGroupDocument) {
         return GroupDetailsResponse.builder()
                 .groupId(savedGroupDocument.getGroupId())
+                .discoverableId(savedGroupDocument.getGroupDiscoverableId())
                 .groupName(savedGroupDocument.getGroupName())
                 .groupDescription(savedGroupDocument.getDescription())
                 .createdByUserId(savedGroupDocument.getCreatedByUser())

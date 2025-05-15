@@ -31,4 +31,6 @@ public interface UserService {
     public void deleteUserFromDb(String id);
 
     boolean isEmailVerified(String email);
+
+    String sendEmailVerificationLink(String email);
 }
