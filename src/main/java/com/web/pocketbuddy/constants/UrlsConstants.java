@@ -6,9 +6,8 @@ public class UrlsConstants {
 
     private UrlsConstants() {}
 
-    @Value("server.port")
-    private static String port;
-    public static final String HOST_HTTP_BASE_URL = "http://192.168.1.4:"+port;
+    public static final String port = "9069";
+    public static final String HOST_HTTP_BASE_URL = "http://192.168.1.40:"+port;
     public static final String HOST_URL = "/pocketbuddy";
     public static final String BASE_URL_V1 = HOST_URL + "/api/v1";
 
