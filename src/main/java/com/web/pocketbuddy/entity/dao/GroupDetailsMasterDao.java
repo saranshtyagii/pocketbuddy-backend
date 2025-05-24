@@ -9,4 +9,6 @@ public interface GroupDetailsMasterDao extends MongoRepository<GroupDocument, St
     Optional<GroupDocument> findByGroupId(String groupId);
 
     boolean existsByGroupDiscoverableId(String groupDiscoverableId);
+
+    Optional<GroupDocument> findByGroupDiscoverableId(String discoverableId);
 }

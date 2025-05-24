@@ -1,5 +1,6 @@
 package com.web.pocketbuddy.service.response;
 
+import com.web.pocketbuddy.constants.RedisConstants;
 import com.web.pocketbuddy.dto.GroupDetailsResponse;
 import com.web.pocketbuddy.entity.dao.GroupDetailsMasterDao;
 import com.web.pocketbuddy.entity.document.GroupDocument;
@@ -11,6 +12,7 @@ import com.web.pocketbuddy.service.UserService;
 import com.web.pocketbuddy.service.mapper.MapperUtils;
 import com.web.pocketbuddy.utils.ConfigService;
 import com.web.pocketbuddy.utils.GenerateUtils;
+import com.web.pocketbuddy.utils.RedisServices;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,8 @@ public class GroupDetailsResponseService implements GroupDetailsService {
 
     private final UserService userService;
     private final GroupDetailsMasterDao groupDetailsMasterDoa;
+    private final RedisServices redisServices;
+    private final GroupDetailsMasterDao groupDetailsMasterDao;
 
     @Override
     public GroupDetailsResponse registerGroup(GroupRegisterDetails registerDetails) {
@@ -236,6 +240,47 @@ public class GroupDetailsResponseService implements GroupDetailsService {
 
     private boolean existsGroupByDiscoverableId(String discoverableId) {
         return groupDetailsMasterDoa.existsByGroupDiscoverableId(discoverableId);
+    }
+
+    public GroupDetailsResponse findGroupByDiscoverableId(String discoverableId) {
+        try {
+            GroupDocument groupDocument = null;
+            groupDocument = findGroupInCache(discoverableId);
+            if(ObjectUtils.isEmpty(groupDocument)) {
+                // find group from DB
+                groupDocument = groupDetailsMasterDao.findByGroupDiscoverableId(discoverableId)
+                        .orElseThrow(() -> new GroupApiExceptions("No such group found!", HttpStatus.NOT_FOUND));
+                // update group in cache
+                updateGroupInCache(groupDocument);
+            }
+            return MapperUtils.convertGroupDetailResponse(groupDocument);
+        } catch (Exception e) {
+            throw new GroupApiExceptions("Something went wrong while fetching group details", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private void updateGroupInCache(GroupDocument groupDocument) {
+        try {
+            String key = RedisConstants.GROUP_KEY + groupDocument.getGroupDiscoverableId();
+            String mappedString = MapperUtils.convertObjectToString(groupDocument);
+            redisServices.set(key, mappedString);
+        } catch (Exception e) {
+            // ignore
+        }
+    }
+
+    private GroupDocument findGroupInCache(String discoverableId) {
+        try {
+            String key = RedisConstants.GROUP_KEY + discoverableId;
+            String mappedString = redisServices.get(key);
+            if (StringUtils.isEmpty(mappedString)) {
+                return null;
+            }
+            return MapperUtils.convertStringToObject(mappedString, GroupDocument.class);
+        } catch (Exception e) {
+            // ignore
+            return null;
+        }
     }
 
 }

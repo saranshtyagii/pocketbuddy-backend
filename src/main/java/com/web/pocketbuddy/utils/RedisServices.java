@@ -20,7 +20,7 @@ public class RedisServices {
     // Set with expiration in seconds
     public void set(String key, Object value, Long expireTimeInSeconds) {
        try {
-           redisTemplate.opsForValue().set(key, value, expireTimeInSeconds);
+           redisTemplate.opsForValue().set(key, value, expireTimeInSeconds, TimeUnit.SECONDS);
        } catch (Exception e) {
            // ignore
        }

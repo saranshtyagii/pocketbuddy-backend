@@ -280,7 +280,7 @@ public class UserResponseService implements UserService {
         try {
             value = redisServices.get(key);
             redisServices.delete(key);
-            if(value == null) throw new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST);
+            if(StringUtils.isEmpty(value)) throw new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             throw new UserApiException("Something went wrong while verifying email token", HttpStatus.BAD_REQUEST);
         }
@@ -289,7 +289,8 @@ public class UserResponseService implements UserService {
             throw new UserApiException("Email already verified", HttpStatus.BAD_REQUEST);
         }
         savedDocument.setEmailVerified(true);
-        userMasterDoa.save(savedDocument);
+        UserDocument updateUser = userMasterDoa.save(savedDocument);
+        updateUserInCache(updateUser);
         return savedDocument.getEmail();
     }
 

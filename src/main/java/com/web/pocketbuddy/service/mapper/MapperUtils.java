@@ -200,12 +200,13 @@ public class MapperUtils {
                 .build();
     }
 
-    public static UserDocument convertStringToObject(String mapperString, Class<UserDocument> userDocumentClass) {
+    public static <T> T convertStringToObject(String mapperString, Class<T> clazz) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.readValue(mapperString, userDocumentClass);
+            return objectMapper.readValue(mapperString, clazz);
         } catch (Exception e) {
             return null;
         }
     }
+
 }

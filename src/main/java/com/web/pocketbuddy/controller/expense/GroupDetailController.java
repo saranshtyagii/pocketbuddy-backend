@@ -36,6 +36,11 @@ public class GroupDetailController {
         return ResponseEntity.ok(groupDetailsService.findGroupById(groupId));
     }
 
+    @GetMapping("/find-by-discoverable-id")
+    public ResponseEntity<GroupDetailsResponse> findGroupByDiscoverableID(@RequestParam String discoverableId) {
+        return ResponseEntity.ok(groupDetailsService.findGroupByDiscoverableId(discoverableId));
+    }
+
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteGroup(@RequestParam String groupId, @RequestParam String userId) {
         return ResponseEntity.ok(groupDetailsService.deleteGroup(groupId, userId));
