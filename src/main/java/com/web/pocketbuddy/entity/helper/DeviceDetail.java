@@ -1,16 +1,15 @@
 package com.web.pocketbuddy.entity.helper;
 
-import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import java.util.Date;
 
 @Getter
-@Builder
+@Setter
+@NoArgsConstructor
 @AllArgsConstructor
-@NotNull
+@ToString
+@Builder
 public class DeviceDetail {
 
     private Date loginDate;

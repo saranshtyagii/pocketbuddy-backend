@@ -1,8 +1,6 @@
 package com.web.pocketbuddy.service.response;
 
-import com.web.pocketbuddy.constants.ConstantsVariables;
-import com.web.pocketbuddy.constants.NotificationTemplate;
-import com.web.pocketbuddy.constants.UrlsConstants;
+import com.web.pocketbuddy.constants.*;
 import com.web.pocketbuddy.dto.UserDetailResponse;
 import com.web.pocketbuddy.entity.dao.UserMasterDao;
 import com.web.pocketbuddy.entity.document.UserDocument;
@@ -68,7 +66,7 @@ public class UserResponseService implements UserService {
         if(StringUtils.isEmpty(previousToken)) {
             String token = GenerateUtils.generateToken();
             String key = RedisUtils.EMAIL_VERIFICATION_TOKEN_KEY + token;
-            redisServices.set(key, email, 60 * 5);
+            redisServices.set(key, email, 60 * 5L);
             previousToken = token;
         }
         return UrlsConstants.HOST_HTTP_BASE_URL + UrlsConstants.AUTH_URL + "/verify/email?token=" + previousToken;
@@ -76,7 +74,14 @@ public class UserResponseService implements UserService {
 
     @Override
     public UserDetailResponse findUserByEmail(String email) {
-        return MapperUtils.UserDetailResponse(fetchUserByEmail(email));
+        UserDocument userDocument = null;
+        // find the data in redis
+        userDocument = fetchUserFromCache(email);
+        if(ObjectUtils.isEmpty(userDocument)) {
+            userDocument = fetchUserByEmail(email);
+            updateUserInCache(userDocument);
+        }
+        return MapperUtils.UserDetailResponse(userDocument);
     }
 
     @Override
@@ -127,7 +132,7 @@ public class UserResponseService implements UserService {
         String otp = GenerateUtils.generateOtp(mobileNumber);
 
         String key = RedisUtils.OTP_VERIFICATION_KEY + mobileNumber;
-        redisServices.set(key, otp, 60 * 5);
+        redisServices.set(key, otp, 60 * 5L);
 
         userMasterDoa.save(userDocument);
         resendOneTimePasswordForMobile(mobileNumber, otp);
@@ -323,6 +328,30 @@ public class UserResponseService implements UserService {
     private UserDocument fetchUserByEmail(String email) {
         return userMasterDoa.findByEmail(email)
                 .orElseThrow(() -> new UserApiException(ConstantsVariables.NO_SUCH_USER_FOUND, HttpStatus.BAD_REQUEST));
+    }
+
+    private UserDocument fetchUserFromCache(String email) {
+        try {
+            String userKey = RedisConstants.USER_REDIS_KEY + email;
+            String mapperString = redisServices.get(userKey);
+            if(StringUtils.isEmpty(mapperString)) {
+                return null;
+            }
+            return MapperUtils.convertStringToObject(mapperString, UserDocument.class);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private void updateUserInCache(UserDocument userDocument) {
+        try {
+            String mapperString = MapperUtils.convertObjectToString(userDocument);
+            String userKey = RedisConstants.USER_REDIS_KEY + userDocument.getEmail();
+            redisServices.set(userKey, mapperString, 24 * 60 * 60L);
+        } catch (Exception e) {
+            // ignore
+        }
+
     }
 
 }

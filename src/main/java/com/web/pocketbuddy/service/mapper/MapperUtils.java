@@ -199,4 +199,13 @@ public class MapperUtils {
                 .isDeleted(false)
                 .build();
     }
+
+    public static UserDocument convertStringToObject(String mapperString, Class<UserDocument> userDocumentClass) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.readValue(mapperString, userDocumentClass);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }
