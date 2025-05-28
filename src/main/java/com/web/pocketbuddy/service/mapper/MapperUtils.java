@@ -155,28 +155,6 @@ public class MapperUtils {
                 .build();
     }
 
-    public static String maskEmail(@Email String email) {
-        if (email == null || !email.contains("@")) {
-            return email; // or throw an exception if you prefer
-        }
-
-        String[] parts = email.split("@");
-        String username = parts[0];
-        String domain = parts[1];
-
-        if (username.length() <= 2) {
-            // Mask entire username if it's too short
-            username = "*".repeat(username.length());
-        } else {
-            // Keep first and last character, mask the rest
-            int maskLength = username.length() - 2;
-            String maskedPart = "*".repeat(maskLength);
-            username = username.charAt(0) + maskedPart + username.charAt(username.length() - 1);
-        }
-
-        return username + "@" + domain;
-    }
-
     public static UserDetailResponse UserDetailResponse(UserDocument userDocument) {
         return UserDetailResponse.builder()
                 .userId(userDocument.getUserId())
@@ -206,6 +184,27 @@ public class MapperUtils {
             return objectMapper.readValue(mapperString, clazz);
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    public static String maskedString(@Email String unMaskedString, boolean isEmail) {
+        if (isEmail) {
+            String[] splitString = unMaskedString.split("@");
+            if (splitString.length != 2) {
+                return unMaskedString;
+            }
+            String localPart = splitString[0];
+            String domain = splitString[1];
+            if (localPart.length() <= 2) {
+                return localPart + "@****";
+            }
+            String maskedLocalPart = localPart.charAt(0) + "*".repeat(localPart.length() - 2) + localPart.charAt(localPart.length() - 1);
+            return maskedLocalPart + "@" + domain;
+        } else {
+            if (unMaskedString.length() <= 2) {
+                return "*".repeat(unMaskedString.length()); // Mask fully if too short
+            }
+            return unMaskedString.charAt(0) + "*".repeat(unMaskedString.length() - 2) + unMaskedString.charAt(unMaskedString.length() - 1);
         }
     }
 

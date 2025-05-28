@@ -120,7 +120,7 @@ public class UserResponseService implements UserService {
             resendOneTimePasswordForMobile(mobileNumber, null);
         }
 
-        return ConstantsVariables.OTP_SEND_MESSAGE + maskedString(savedUser.getMobileNumber(), false);
+        return ConstantsVariables.OTP_SEND_MESSAGE + MapperUtils.maskedString(savedUser.getMobileNumber(), false);
     }
 
     private void saveAndGenerateOneTimePasswordForMobile(String mobileNumber) {
@@ -219,7 +219,7 @@ public class UserResponseService implements UserService {
         String restLink = UrlsConstants.HOST_HTTP_BASE_URL + "/template/change-password?token=" + savedUser.getChangePasswordToken();
         notificationService.sendEmail(savedUser.getEmail(), "Pocket Buddy Update Password", NotificationTemplate.CHANGE_PASSWORD, "{{reset_link}}", restLink);
 
-        return "Email has been send for change password on: " + MapperUtils.maskEmail(savedUser.getEmail());
+        return "Email has been send for change password on: " + MapperUtils.maskedString(savedUser.getEmail(), true);
     }
 
     @Override
@@ -247,7 +247,7 @@ public class UserResponseService implements UserService {
         UserDocument savedUser = fetchUserByEmail(email);
 //        savedUser.setOneTimePassword(GenerateUtils.generateOtp(email));
         userMasterDoa.save(savedUser);
-        return ConstantsVariables.OTP_SEND_MESSAGE + maskedString(savedUser.getMobileNumber(), false);
+        return ConstantsVariables.OTP_SEND_MESSAGE + MapperUtils.maskedString(savedUser.getMobileNumber(), false);
     }
 
 
@@ -303,27 +303,6 @@ public class UserResponseService implements UserService {
     private boolean isMobileNumberExist(String mobileNumber) {
         UserDocument savedUser = userMasterDoa.findByMobileNumber(mobileNumber).orElse(null);
         return ObjectUtils.isEmpty(savedUser);
-    }
-
-    private String maskedString(@Email String unMaskedString, boolean isEmail) {
-        if (isEmail) {
-            String[] splitString = unMaskedString.split("@");
-            if (splitString.length != 2) {
-                return unMaskedString;
-            }
-            String localPart = splitString[0];
-            String domain = splitString[1];
-            if (localPart.length() <= 2) {
-                return localPart + "@****";
-            }
-            String maskedLocalPart = localPart.charAt(0) + "*".repeat(localPart.length() - 2) + localPart.charAt(localPart.length() - 1);
-            return maskedLocalPart + "@" + domain;
-        } else {
-            if (unMaskedString.length() <= 2) {
-                return "*".repeat(unMaskedString.length()); // Mask fully if too short
-            }
-            return unMaskedString.charAt(0) + "*".repeat(unMaskedString.length() - 2) + unMaskedString.charAt(unMaskedString.length() - 1);
-        }
     }
 
     private UserDocument fetchUserByEmail(String email) {
