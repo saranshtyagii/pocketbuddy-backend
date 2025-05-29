@@ -5,6 +5,7 @@ import com.web.pocketbuddy.payload.FindExpenseByDates;
 import com.web.pocketbuddy.payload.RegisterGroupExpense;
 
 import java.util.List;
+import java.util.Map;
 
 public interface GroupExpenseService {
 
@@ -17,4 +18,7 @@ public interface GroupExpenseService {
     public List<GroupExpenseDto> fetchGroupExpenseByGroupId(String groupId);
 
     public List<GroupExpenseDto> fetchAllExpenseByDates(FindExpenseByDates details);
+
+    public Map<String, Map<String, Double>> fetchOweAmount(String groupId);
+    public Map<String, Map<String, Double>> fetchWhoPaidToWhom(String groupId);
 }

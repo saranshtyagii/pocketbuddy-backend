@@ -164,6 +164,36 @@ public class GroupExpenseResponseService implements GroupExpenseService {
                 .toList();
     }
 
+    @Override
+    public Map<String, Map<String, Double>> fetchOweAmount(String groupId) {
+        GroupDocument savedGroup = groupDetailsService.findGroupDocumentById(groupId);
+        List<GroupExpenseDocument> savedExpenses = fetchAllExpensesByGroup(groupId);
+        if (CollectionUtils.isEmpty(savedExpenses)) {
+            return Collections.emptyMap();
+        }
+        Map<String, Double> amountPaidByMembers = savedGroup.getMembers();
+        Map<String, Map<String, Double>> oweAmountMap = new HashMap<>();
+        savedExpenses.forEach(expense -> {
+            Map<String, GroupExpenseMetaData> includedMembers = expense.getIncludedMembers();
+            includedMembers.forEach((userId, groupExpenseMetaData) -> {
+                if (amountPaidByMembers.containsKey(userId)) {
+                    double paidAmount = amountPaidByMembers.get(userId);
+                    double oweAmount = groupExpenseMetaData.getAmount() - paidAmount;
+                    if (oweAmount > 0) {
+                        if (oweAmountMap.containsKey(userId)) {}
+                    }
+                }
+            });
+        });
+        return oweAmountMap;
+    }
+
+    @Override
+    public Map<String, Map<String, Double>> fetchWhoPaidToWhom(String groupId) {
+        Map<String, Map<String, Double>> oweAmountMap = fetchOweAmount(groupId);
+        return oweAmountMap;
+    }
+
     private List<GroupExpenseDocument> fetchAllExpensesByGroupAndUser(String groupId, String userId) {
 
         List<GroupExpenseDocument> savedExpenses = groupExpenseMasterDao.findByGroupId(groupId);
