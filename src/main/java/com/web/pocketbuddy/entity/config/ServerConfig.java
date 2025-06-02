@@ -13,7 +13,4 @@ public class ServerConfig {
         return serverConfig;
     }
 
-    private static String jwtTokenSecretKey = "";
-
-
 }

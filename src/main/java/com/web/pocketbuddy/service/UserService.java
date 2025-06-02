@@ -4,6 +4,7 @@ import com.web.pocketbuddy.dto.UserDetailResponse;
 import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.payload.RegisterUser;
 import com.web.pocketbuddy.payload.UserCredentials;
+import jakarta.validation.constraints.Email;
 
 public interface UserService {
 
@@ -33,4 +34,6 @@ public interface UserService {
     boolean isEmailVerified(String email);
 
     String sendEmailVerificationLink(String email);
+
+    UserDocument findUserByEmailAsDocument(@Email String email, String apiKey);
 }

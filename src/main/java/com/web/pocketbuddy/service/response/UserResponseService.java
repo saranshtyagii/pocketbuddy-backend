@@ -5,6 +5,7 @@ import com.web.pocketbuddy.dto.UserDetailResponse;
 import com.web.pocketbuddy.entity.dao.UserMasterDao;
 import com.web.pocketbuddy.entity.document.UserDocument;
 import com.web.pocketbuddy.entity.helper.DeviceDetail;
+import com.web.pocketbuddy.utils.ConfigService;
 import com.web.pocketbuddy.utils.GenerateUtils;
 import com.web.pocketbuddy.exception.UserApiException;
 import com.web.pocketbuddy.payload.RegisterUser;
@@ -271,6 +272,15 @@ public class UserResponseService implements UserService {
         String emailVerificationUrl = buildEmailVerificationUrl(savedUser.getEmail());
         notificationService.sendEmail(savedUser.getEmail(), "Verify Email Address", NotificationTemplate.EMAIL_VERIFICATION, NotificationTemplate.EMAIL_VALUE_REPLACE_KEY, emailVerificationUrl);
         return "Verification link has been sent";
+    }
+
+    @Override
+    public UserDocument findUserByEmailAsDocument(String email, String apiKey) {
+        if(apiKey.equals(ConfigService.getInstance().getApiKey())) {
+            return fetchUserByEmail(email);
+        } else {
+            throw new UserApiException("Invalid API Key", HttpStatus.BAD_REQUEST);
+        }
     }
 
     @Override

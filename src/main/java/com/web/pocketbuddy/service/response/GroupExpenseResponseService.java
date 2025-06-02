@@ -173,14 +173,27 @@ public class GroupExpenseResponseService implements GroupExpenseService {
         }
         Map<String, Double> amountPaidByMembers = savedGroup.getMembers();
         Map<String, Map<String, Double>> oweAmountMap = new HashMap<>();
+        Double totalAmount = amountPaidByMembers.values().stream().mapToDouble(Double::doubleValue).sum();
         savedExpenses.forEach(expense -> {
             Map<String, GroupExpenseMetaData> includedMembers = expense.getIncludedMembers();
             includedMembers.forEach((userId, groupExpenseMetaData) -> {
                 if (amountPaidByMembers.containsKey(userId)) {
                     double paidAmount = amountPaidByMembers.get(userId);
-                    double oweAmount = groupExpenseMetaData.getAmount() - paidAmount;
+                    double oweAmount = totalAmount - paidAmount;
                     if (oweAmount > 0) {
-                        if (oweAmountMap.containsKey(userId)) {}
+                        if (oweAmountMap.containsKey(userId)) {
+                            // update the previous value amount while adding with the new amount into it.
+                            Map<String, Double> existingUserOweMap = oweAmountMap.get(userId);
+                            double updateAmount = existingUserOweMap.getOrDefault(userId, 0.0) + oweAmount;
+                            oweAmountMap.get(userId).put(userId, updateAmount);
+                        } else {
+                            // create new data for the user
+                            Map<String, Double> newUserMap = new HashMap<>();
+                            UserDocument userDocument = userService.findUserById(userId);
+                            String fullname = userDocument.getUserFirstName() +" "+userDocument.getUserLastName();
+                            newUserMap.put(fullname, oweAmount);
+                            oweAmountMap.put(userId, newUserMap);
+                        }
                     }
                 }
             });

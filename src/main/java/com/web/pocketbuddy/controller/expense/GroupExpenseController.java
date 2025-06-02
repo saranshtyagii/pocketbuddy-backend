@@ -37,12 +37,12 @@ public class GroupExpenseController {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
     }
 
-    @GetMapping("/fetch-owe-amount")
+    @GetMapping("/fetchOweAmount")
     public ResponseEntity<Map<String, Map<String, Double>>> fetchOweAmount(@RequestParam String groupId) {
         return ResponseEntity.ok(groupExpenseService.fetchOweAmount(groupId));
     }
 
-    @GetMapping("/fetch-who-paid-to-whom")
+    @GetMapping("/fetchWhoPaidToWhom")
     public ResponseEntity<Map<String, Map<String, Double>>> fetchWhoPaidToWhom(@RequestParam String groupId, @RequestParam String userId) {
         return ResponseEntity.ok(groupExpenseService.fetchWhoPaidToWhom(groupId));
     }

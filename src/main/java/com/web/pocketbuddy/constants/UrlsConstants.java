@@ -7,7 +7,7 @@ public class UrlsConstants {
     private UrlsConstants() {}
 
     public static final String port = "9069";
-    public static final String HOST_HTTP_BASE_URL = "http://192.168.29.152:"+port;
+    public static final String HOST_HTTP_BASE_URL = "http://172.20.10.6:"+port;
     public static final String HOST_URL = "/pocketbuddy";
     public static final String BASE_URL_V1 = HOST_URL + "/api/v1";
 
